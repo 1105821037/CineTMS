@@ -1,0 +1,300 @@
+<div class="kdm-shell hall-cpl-shell" data-bound="false">
+  <section class="kdm-page-head">
+    <div>
+      <h2 class="kdm-page-title text-3xl font-bold">影厅 CPL 管理</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        <span data-hall-cpl-field="hall-name">当前影厅</span>
+        <span class="mx-1">/</span>
+        管理GDC设备内的影片包
+      </p>
+    </div>
+
+    <div class="kdm-page-actions flex flex-wrap items-center gap-3">
+      <button id="hallCplRefresh" type="button" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-rotate"></i>
+        刷新
+      </button>
+      <button id="hallCplRepositoryImport" type="button" class="btn btn-primary btn-sm gap-2">
+        <i class="fas fa-box-open"></i>
+        从存储库导入
+      </button>
+      <button id="hallCplExternalImport" type="button" class="btn btn-secondary btn-sm gap-2">
+        <i class="fas fa-network-wired"></i>
+        从外部导入
+      </button>
+      <button id="hallCplTaskTrigger" type="button" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-list-check"></i>
+        导入任务
+      </button>
+    </div>
+  </section>
+
+  <dialog id="hallCplRepositoryModal" class="modal">
+    <div class="modal-box kdm-upload-modal hall-kdm-wide-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">从存储库导入</h3>
+          <p id="hallCplRepositorySummary" class="mt-1 text-sm text-base-content/60">选择要导入当前影厅的 CPL</p>
+        </div>
+        <button id="hallCplRepositoryClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="w-10"><input id="hallCplSelectAll" type="checkbox" class="checkbox checkbox-sm"></th>
+              <th>影片版本</th>
+              <th>影片包</th>
+              <th>信息</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="hallCplRepositoryTable">
+            <tr><td colspan="6" class="text-center text-base-content/60">正在加载存储库 CPL...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-action kdm-upload-modal-actions">
+        <span id="hallCplRepositorySelection" class="text-sm text-base-content/60">已选 0 项</span>
+        <div class="flex-1"></div>
+        <button id="hallCplRepositoryCancel" type="button" class="btn btn-sm btn-ghost">关闭</button>
+        <button id="hallCplBatchImport" type="button" class="btn btn-sm btn-primary gap-2">
+          <i class="fas fa-download"></i>
+          导入已选
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <dialog id="hallCplExternalModal" class="modal">
+    <div class="modal-box kdm-upload-modal hall-kdm-wide-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">从外部 FTP 导入</h3>
+          <p id="hallCplExternalSummary" class="mt-1 text-sm text-base-content/60">选择外部 FTP 中的 DCP 包</p>
+        </div>
+        <button id="hallCplExternalClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+        <section class="space-y-3">
+          <div class="flex flex-wrap items-end gap-2">
+            <label class="form-control min-w-64 flex-1">
+              <span class="label-text">FTP 来源</span>
+              <select id="hallCplExternalSource" class="select select-bordered select-sm"></select>
+            </label>
+            <button id="hallCplExternalReload" type="button" class="btn btn-sm btn-ghost gap-2">
+              <i class="fas fa-rotate"></i>
+              刷新
+            </button>
+            <button id="hallCplExternalRemoveSource" type="button" class="btn btn-sm btn-ghost gap-2" disabled>
+              <i class="fas fa-trash"></i>
+              移除
+            </button>
+            <button id="hallCplExternalOpenAddSource" type="button" class="btn btn-sm btn-primary gap-2">
+              <i class="fas fa-plus"></i>
+              添加
+            </button>
+          </div>
+
+          <div>
+            <div class="mb-2 flex items-center justify-between gap-2 text-sm text-base-content/65">
+              <span>目录树</span>
+              <span id="hallCplExternalPath">/</span>
+            </div>
+            <div id="hallCplExternalTree" class="rounded border border-base-300 p-2 text-sm overflow-y-auto" style="height: 26rem;">
+              <div class="py-8 text-center text-base-content/60">请选择 FTP 来源。</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <div>
+            <h4 class="font-semibold">影片版本</h4>
+            <p id="hallCplExternalPackageMeta" class="mt-1 text-sm text-base-content/60">尚未选择 DCP 包。</p>
+          </div>
+          <div id="hallCplExternalCplTable" class="overflow-hidden rounded border border-base-300">
+            <div class="py-8 text-center text-base-content/60">读取 DCP 包后显示版本。</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal-action kdm-upload-modal-actions">
+        <span id="hallCplExternalSelection" class="text-sm text-base-content/60">未选择版本</span>
+        <div class="flex-1"></div>
+        <button id="hallCplExternalCancel" type="button" class="btn btn-sm btn-ghost">关闭</button>
+        <button id="hallCplExternalConfirm" type="button" class="btn btn-sm btn-primary gap-2" disabled>
+          <i class="fas fa-download"></i>
+          创建导入任务
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <dialog id="hallCplExternalAddModal" class="modal">
+    <div class="modal-box kdm-upload-modal max-w-2xl">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">添加外部 FTP 连接</h3>
+          <p class="mt-1 text-sm text-base-content/60">填写可访问的外部 FTP 地址</p>
+        </div>
+        <button id="hallCplExternalAddClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 grid gap-3 md:grid-cols-2">
+        <label class="form-control">
+          <span class="label-text">名称</span>
+          <input id="hallCplExternalName" type="text" class="input input-bordered input-sm" placeholder="外部 FTP">
+        </label>
+        <label class="form-control">
+          <span class="label-text">主机</span>
+          <input id="hallCplExternalHost" type="text" class="input input-bordered input-sm" placeholder="192.168.1.10">
+        </label>
+        <label class="form-control">
+          <span class="label-text">端口</span>
+          <input id="hallCplExternalPort" type="number" class="input input-bordered input-sm" value="21" min="1" max="65535">
+        </label>
+        <label class="form-control">
+          <span class="label-text">根目录</span>
+          <input id="hallCplExternalRoot" type="text" class="input input-bordered input-sm" placeholder="/">
+        </label>
+        <label class="form-control">
+          <span class="label-text">用户</span>
+          <input id="hallCplExternalUser" type="text" class="input input-bordered input-sm" placeholder="anonymous">
+        </label>
+        <label class="form-control">
+          <span class="label-text">密码</span>
+          <input id="hallCplExternalPassword" type="password" class="input input-bordered input-sm">
+        </label>
+      </div>
+      <p id="hallCplExternalAddError" class="mt-3 text-sm text-error hidden"></p>
+
+      <div class="modal-action kdm-upload-modal-actions">
+        <button id="hallCplExternalAddCancel" type="button" class="btn btn-sm btn-ghost">取消</button>
+        <button id="hallCplExternalAddSource" type="button" class="btn btn-sm btn-primary gap-2">
+          <i class="fas fa-plus"></i>
+          添加
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <dialog id="hallCplTaskModal" class="modal">
+    <div class="modal-box kdm-upload-modal hall-kdm-wide-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">导入任务</h3>
+          <p id="hallCplTaskSummary" class="mt-1 text-sm text-base-content/60">当前影厅 CPL 摄取记录</p>
+        </div>
+        <button id="hallCplTaskClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>影片版本</th>
+              <th>状态</th>
+              <th>进度</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="hallCplTaskTable">
+            <tr><td colspan="5" class="text-center text-base-content/60">暂无 CPL 导入任务。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-action">
+        <button id="hallCplTaskCancel" type="button" class="btn btn-sm btn-ghost">关闭</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <section id="hallCplStatus" class="alert alert-info">
+    <i class="fas fa-circle-info"></i>
+    <span>正在加载影厅 CPL 信息...</span>
+  </section>
+
+  <section class="kdm-stats-grid">
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <i class="fas fa-film text-2xl"></i>
+        </div>
+        <div class="stat-title">设备内 CPL</div>
+        <div id="hallCplDeviceCount" class="stat-value text-primary">-</div>
+        <div class="stat-desc">当前影厅已存在影片版本</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-success">
+          <i class="fas fa-box-open text-2xl"></i>
+        </div>
+        <div class="stat-title">存储库可导入</div>
+        <div id="hallCplImportableCount" class="stat-value text-success">-</div>
+        <div class="stat-desc">未在当前影厅内的版本</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <i class="fas fa-clock-rotate-left text-2xl"></i>
+        </div>
+        <div class="stat-title">导入任务</div>
+        <div id="hallCplTaskCount" class="stat-value text-warning">-</div>
+        <div class="stat-desc">当前影厅 DCP/CPL 摄取记录</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-xl">
+    <div class="card-body gap-4">
+      <div class="kdm-list-head">
+        <div>
+          <h3 class="card-title text-xl">
+            <i class="fas fa-server"></i>
+            设备内 CPL
+          </h3>
+        </div>
+        <span id="hallCplOnlineBadge" class="badge badge-ghost">未知</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>影片版本</th>
+              <th>类型</th>
+              <th>规格</th>
+              <th>时长</th>
+              <th>导入时间</th>
+              <th class="text-right">操作</th>
+            </tr>
+          </thead>
+          <tbody id="hallCplDeviceTable">
+            <tr><td colspan="6" class="text-center text-base-content/60">正在加载设备内 CPL...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

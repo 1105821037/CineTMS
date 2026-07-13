@@ -1,0 +1,29 @@
+services:
+  tms:
+    build:
+      context: .
+      args:
+        TMS_BUILD_TIME: ${TMS_BUILD_TIME:-}
+        TMS_RELEASE_CHANNEL: ${TMS_RELEASE_CHANNEL:-docker}
+        TMS_COMMIT: ${TMS_COMMIT:-}
+    image: tms:latest
+    container_name: tms-web
+    restart: unless-stopped
+    environment:
+      PORT: "4173"
+      FTP_HOST: "0.0.0.0"
+      FTP_PORT: "2121"
+      FTP_PASV_MIN: "41000"
+      FTP_PASV_MAX: "41100"
+      KDM_AUTO_DOWNLOAD_DIR: "/app/scripts/kdm-auto-download-ts"
+      KDM_YOLO_MODEL: "/app/scripts/kdm-auto-download-ts/best.onnx"
+      KDM_STATE_DIR: "/app/.tms/kdm-auto-download"
+      # 如果放映机需要通过宿主机 IP 访问此容器的 FTP，被动模式地址建议改为宿主机局域网 IP。
+      # FTP_PASV_HOST: "192.168.1.100"
+    ports:
+      - "4173:4173"
+      - "2121:2121"
+      - "41000-41100:41000-41100"
+    volumes:
+      - ./.tms:/app/.tms
+      - ./storage:/app/.tms/repository

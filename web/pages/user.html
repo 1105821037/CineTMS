@@ -1,0 +1,91 @@
+<div class="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold">用户管理</h2>
+  </div>
+
+  <!-- 修改密码 -->
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body">
+      <h3 class="card-title text-base">修改密码</h3>
+      <form id="changePasswordForm" class="space-y-3 max-w-sm">
+        <div class="form-control">
+          <label class="label"><span class="label-text">当前密码</span></label>
+          <input type="password" id="oldPassword" class="input input-bordered input-sm w-full" required autocomplete="current-password" />
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">新密码</span></label>
+          <input type="password" id="newPassword" class="input input-bordered input-sm w-full" required minlength="4" autocomplete="new-password" />
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">确认新密码</span></label>
+          <input type="password" id="confirmPassword" class="input input-bordered input-sm w-full" required minlength="4" autocomplete="new-password" />
+        </div>
+        <div id="changePasswordError" class="text-error text-xs hidden"></div>
+        <div id="changePasswordSuccess" class="text-success text-xs hidden"></div>
+        <button type="submit" class="btn btn-primary btn-sm">保存密码</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 用户列表 -->
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="card-title text-base">用户列表</h3>
+        <button id="addUserBtn" class="btn btn-primary btn-sm">
+          <i class="fas fa-plus mr-1"></i>新增用户
+        </button>
+      </div>
+      <div id="userListContainer">
+        <div class="flex justify-center py-4">
+          <span class="loading loading-spinner loading-sm"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增用户 Modal -->
+  <dialog id="addUserModal" class="modal">
+    <div class="modal-box max-w-sm">
+      <h3 class="font-bold text-lg mb-4">新增用户</h3>
+      <form id="addUserForm" class="space-y-3">
+        <div class="form-control">
+          <label class="label"><span class="label-text">用户名</span></label>
+          <input type="text" id="newUsername" class="input input-bordered input-sm w-full" required pattern="[A-Za-z0-9_.\-]{3,64}" />
+          <label class="label"><span class="label-text-alt">3-64 位，字母、数字、下划线、点、短横线</span></label>
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">密码</span></label>
+          <input type="password" id="newUserPassword" class="input input-bordered input-sm w-full" required minlength="4" autocomplete="new-password" />
+        </div>
+        <div id="addUserError" class="text-error text-xs hidden"></div>
+        <div class="modal-action">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('addUserModal').close()">取消</button>
+          <button type="submit" class="btn btn-primary btn-sm">创建</button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <!-- 重置密码 Modal -->
+  <dialog id="resetPasswordModal" class="modal">
+    <div class="modal-box max-w-sm">
+      <h3 class="font-bold text-lg mb-4">重置密码</h3>
+      <p class="text-sm mb-3">为用户 <span id="resetPasswordUsername" class="font-medium"></span> 设置新密码：</p>
+      <form id="resetPasswordForm" class="space-y-3">
+        <input type="hidden" id="resetPasswordUserId" />
+        <div class="form-control">
+          <label class="label"><span class="label-text">新密码</span></label>
+          <input type="password" id="resetNewPassword" class="input input-bordered input-sm w-full" required minlength="4" autocomplete="new-password" />
+        </div>
+        <div id="resetPasswordError" class="text-error text-xs hidden"></div>
+        <div class="modal-action">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('resetPasswordModal').close()">取消</button>
+          <button type="submit" class="btn btn-primary btn-sm">确认重置</button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+</div>

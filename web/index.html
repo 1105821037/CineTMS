@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CineTMS影院管理系统</title>
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+
+  <link href="./assets/vendor/daisyui/daisyui.min.css" rel="stylesheet" type="text/css">
+  <link href="./assets/vendor/daisyui/themes.css" rel="stylesheet" type="text/css">
+  <script src="./assets/vendor/tailwindcss/tailwind-browser.min.js"></script>
+  <link rel="stylesheet" href="./assets/vendor/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="./assets/css/base.css">
+  <link rel="stylesheet" href="./assets/css/layout.css">
+  <link rel="stylesheet" href="./assets/css/components.css">
+  <link rel="stylesheet" href="./assets/css/pages/home.css">
+  <link rel="stylesheet" href="./assets/css/pages/cinema.css">
+  <link rel="stylesheet" href="./assets/css/pages/setup.css">
+  <link rel="stylesheet" href="./assets/css/pages/login.css">
+  <link rel="stylesheet" href="./assets/css/pages/kdm.css">
+  <link rel="stylesheet" href="./assets/css/pages/playlist-editor.css">
+  <link rel="stylesheet" href="./assets/css/pages/film-playback.css">
+  <link rel="stylesheet" href="./assets/css/pages/film-schedule.css">
+  <link rel="stylesheet" href="./assets/css/pages/film-schedule-mobile.css">
+  <link rel="stylesheet" href="./assets/css/pages/about.css">
+</head>
+<body class="bg-base-200 app-booting">
+  <script>
+    (() => {
+      const route = window.location.hash.slice(2).split("/")[0];
+      if (route === "login" || route === "setup") {
+        document.body.classList.add("setup-mode");
+      }
+    })();
+  </script>
+
+  <div id="sidebarOverlay" class="sidebar-overlay md:hidden"></div>
+
+  <div class="flex h-screen overflow-hidden">
+    <aside id="sidebar" class="sidebar w-64 bg-base-100 shadow-xl flex flex-col">
+      <div class="p-4 md:p-6 border-b border-base-300">
+        <div class="flex items-center justify-between">
+          <div class="brand-banner" aria-label="CineTMS">
+            <img src="./assets/images/header_logo.png" alt="CineTMS" class="brand-banner-image brand-banner-image-light">
+            <img src="./assets/images/header_logo_dark.png" alt="CineTMS" class="brand-banner-image brand-banner-image-dark">
+          </div>
+          <button id="sidebarClose" class="btn btn-ghost btn-sm btn-circle md:hidden" aria-label="关闭侧边栏">
+            <i class="fas fa-angle-left"></i>
+          </button>
+        </div>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-3 md:p-4">
+        <ul class="menu space-y-1">
+          <li>
+            <a href="#/home" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors active:scale-95" data-page="home">
+              <i class="fas fa-home flex-shrink-0"></i>
+              <span>首页</span>
+            </a>
+          </li>
+          <li>
+            <details id="cinemaNavGroup" open>
+              <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors">
+                <i class="fas fa-video flex-shrink-0"></i>
+                <span>影厅管理</span>
+              </summary>
+              <ul id="cinemaHallNav" class="ml-2 mt-1 space-y-1">
+                <li class="cinema-nav-empty">
+                  <span>正在加载影厅...</span>
+                </li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details id="assetsNavGroup">
+              <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors">
+                <i class="fas fa-box flex-shrink-0"></i>
+                <span>资产管理</span>
+              </summary>
+              <ul class="ml-2 mt-1 space-y-1">
+                <li>
+                  <a href="#/kdm" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="kdm">
+                    <i class="fas fa-key flex-shrink-0 text-sm"></i>
+                    <span>KDM 管理</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#/dcp" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="dcp">
+                    <i class="fas fa-hard-drive flex-shrink-0 text-sm"></i>
+                    <span>DCP 管理</span>
+                  </a>
+                </li>
+              </ul>
+            </details>
+          </li>
+
+          <li>
+            <details id="autoPlaybackNavGroup">
+              <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors">
+                <i class="fas fa-circle-play flex-shrink-0"></i>
+                <span>自动放映</span>
+              </summary>
+              <ul class="ml-2 mt-1 space-y-1">
+                <li>
+                  <a href="#/film-playback" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="film-playback">
+                    <i class="fas fa-film flex-shrink-0 text-sm"></i>
+                    <span>影片放映模板</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#/film-schedule" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="film-schedule">
+                    <i class="fas fa-calendar-days flex-shrink-0 text-sm"></i>
+                    <span>影片排期</span>
+                  </a>
+                </li>
+              </ul>
+            </details>
+          </li>
+
+          <li>
+            <details id="settingsNavGroup">
+              <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors">
+                <i class="fas fa-cog flex-shrink-0"></i>
+                <span>系统设置</span>
+              </summary>
+              <ul class="ml-2 mt-1 space-y-1">
+                <li>
+                  <a href="#/settings-storage" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="settings-storage">
+                    <i class="fas fa-folder-tree flex-shrink-0 text-sm"></i>
+                    <span>存储库与 FTP</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#/settings-halls" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="settings-halls">
+                    <i class="fas fa-clapperboard flex-shrink-0 text-sm"></i>
+                    <span>影厅连接</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#/settings-ticketing" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="settings-ticketing">
+                    <i class="fas fa-ticket flex-shrink-0 text-sm"></i>
+                    <span>售票系统连接</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#/settings-notifications" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="settings-notifications">
+                    <i class="fas fa-paper-plane flex-shrink-0 text-sm"></i>
+                    <span>外部通知</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#/settings" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="settings">
+                    <i class="fas fa-ellipsis flex-shrink-0 text-sm"></i>
+                    <span>其它设置</span>
+                  </a>
+                </li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <a href="#/about" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors active:scale-95" data-page="about">
+              <i class="fas fa-info-circle flex-shrink-0"></i>
+              <span>关于系统</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-user-zone p-3 md:p-4 border-t border-base-300">
+        <div id="sidebarVersion" class="sidebar-version hidden" title="系统版本"></div>
+        <a href="#/user" id="sidebarUser" class="sidebar-user-card flex items-center space-x-3 rounded-lg p-2 hover:bg-base-200 transition-colors cursor-pointer no-underline text-inherit">
+          <div class="avatar placeholder flex-shrink-0">
+            <div class="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
+              <span id="sidebarUserAvatar" class="text-sm">--</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="sidebarUserName" class="text-sm font-medium truncate">加载中...</p>
+            <p class="text-xs text-base-content/60 truncate">用户管理</p>
+          </div>
+        </a>
+        <button id="sidebarLogout" class="btn btn-ghost btn-sm btn-circle sidebar-logout-button" type="button" aria-label="退出登录" title="退出登录">
+          <i class="fas fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <header class="bg-base-100 shadow-sm border-b border-base-300">
+        <div class="flex items-center justify-between px-3 md:px-6 py-3 md:py-4">
+          <div class="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
+            <button id="menuToggle" class="btn btn-ghost btn-sm md:hidden flex-shrink-0" aria-label="打开侧边栏">
+              <i class="fas fa-bars"></i>
+            </button>
+            <div class="breadcrumbs text-xs md:text-sm min-w-0">
+              <ul id="breadcrumb" class="truncate">
+                <li>首页</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
+            <div class="dropdown dropdown-end theme-dropdown">
+              <button tabindex="0" class="btn btn-ghost btn-sm theme-menu-trigger" type="button" aria-label="切换主题">
+                <span class="theme-trigger-swatch" data-theme="light" aria-hidden="true">
+                  <span class="bg-primary"></span>
+                  <span class="bg-secondary"></span>
+                  <span class="bg-accent"></span>
+                  <span class="bg-neutral"></span>
+                </span>
+                <i class="fas fa-chevron-down theme-trigger-chevron" aria-hidden="true"></i>
+              </button>
+              <div tabindex="0" class="dropdown-content theme-menu-panel z-[30] mt-3">
+                <div class="theme-menu-title">主题</div>
+                <ul class="theme-menu-list" aria-label="主题列表">
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="system">
+                    <span class="theme-swatch theme-swatch-system" aria-hidden="true"><i class="fas fa-desktop"></i></span>
+                    <span>跟随系统</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="light">
+                    <span class="theme-swatch" data-theme="light" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>light</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="dark">
+                    <span class="theme-swatch" data-theme="dark" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>dark</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="cupcake">
+                    <span class="theme-swatch" data-theme="cupcake" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>cupcake</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="bumblebee">
+                    <span class="theme-swatch" data-theme="bumblebee" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>bumblebee</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="emerald">
+                    <span class="theme-swatch" data-theme="emerald" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>emerald</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="corporate">
+                    <span class="theme-swatch" data-theme="corporate" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>corporate</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="synthwave">
+                    <span class="theme-swatch" data-theme="synthwave" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>synthwave</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="retro">
+                    <span class="theme-swatch" data-theme="retro" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>retro</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="cyberpunk">
+                    <span class="theme-swatch" data-theme="cyberpunk" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>cyberpunk</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="valentine">
+                    <span class="theme-swatch" data-theme="valentine" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>valentine</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="halloween">
+                    <span class="theme-swatch" data-theme="halloween" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>halloween</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="garden">
+                    <span class="theme-swatch" data-theme="garden" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>garden</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="forest">
+                    <span class="theme-swatch" data-theme="forest" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>forest</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="aqua">
+                    <span class="theme-swatch" data-theme="aqua" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>aqua</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="lofi">
+                    <span class="theme-swatch" data-theme="lofi" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>lofi</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="pastel">
+                    <span class="theme-swatch" data-theme="pastel" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>pastel</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="fantasy">
+                    <span class="theme-swatch" data-theme="fantasy" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>fantasy</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="wireframe">
+                    <span class="theme-swatch" data-theme="wireframe" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>wireframe</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="black">
+                    <span class="theme-swatch" data-theme="black" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>black</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="luxury">
+                    <span class="theme-swatch" data-theme="luxury" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>luxury</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="dracula">
+                    <span class="theme-swatch" data-theme="dracula" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>dracula</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="cmyk">
+                    <span class="theme-swatch" data-theme="cmyk" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>cmyk</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="autumn">
+                    <span class="theme-swatch" data-theme="autumn" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>autumn</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="business">
+                    <span class="theme-swatch" data-theme="business" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>business</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="acid">
+                    <span class="theme-swatch" data-theme="acid" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>acid</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="lemonade">
+                    <span class="theme-swatch" data-theme="lemonade" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>lemonade</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="night">
+                    <span class="theme-swatch" data-theme="night" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>night</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="coffee">
+                    <span class="theme-swatch" data-theme="coffee" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>coffee</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="winter">
+                    <span class="theme-swatch" data-theme="winter" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>winter</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="dim">
+                    <span class="theme-swatch" data-theme="dim" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>dim</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="nord">
+                    <span class="theme-swatch" data-theme="nord" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>nord</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="sunset">
+                    <span class="theme-swatch" data-theme="sunset" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>sunset</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="caramellatte">
+                    <span class="theme-swatch" data-theme="caramellatte" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>caramellatte</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="abyss">
+                    <span class="theme-swatch" data-theme="abyss" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>abyss</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                  <li><button type="button" class="theme-option theme-menu-item" data-theme-value="silk">
+                    <span class="theme-swatch" data-theme="silk" aria-hidden="true"><span class="bg-primary"></span><span class="bg-secondary"></span><span class="bg-accent"></span><span class="bg-neutral"></span></span>
+                    <span>silk</span>
+                    <i class="fas fa-check theme-check" aria-hidden="true"></i>
+                  </button></li>
+                </ul>
+              </div>
+            </div>
+
+            <div id="topNotificationDropdown" class="dropdown dropdown-end">
+              <button id="topNotificationButton" tabindex="0" class="btn btn-ghost btn-sm btn-circle" type="button" aria-label="通知">
+                <div class="indicator">
+                  <i class="fas fa-bell"></i>
+                  <span id="topNotificationBadge" class="badge badge-xs badge-primary indicator-item hidden">0</span>
+                </div>
+              </button>
+              <div tabindex="0" class="dropdown-content top-notification-panel z-[30] mt-3 bg-base-100 shadow-2xl">
+                <div class="top-notification-head">
+                  <div>
+                    <div class="top-notification-title">系统通知</div>
+                    <div id="topNotificationSummary" class="top-notification-summary">正在加载...</div>
+                  </div>
+                  <button id="topNotificationReadAll" class="btn btn-ghost btn-xs" type="button">
+                    全部已读
+                  </button>
+                </div>
+                <div id="topNotificationList" class="top-notification-list">
+                  <div class="top-notification-empty">
+                    <span class="loading loading-spinner loading-sm"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button id="fullscreenToggle" class="btn btn-ghost btn-sm btn-circle hidden lg:flex" aria-label="全屏">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-6 main-container">
+        <div class="content-fade-in">
+          <div class="flex items-center justify-center h-full">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="./assets/app.js"></script>
+</body>
+</html>

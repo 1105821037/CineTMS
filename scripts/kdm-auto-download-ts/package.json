@@ -1,0 +1,25 @@
+{
+  "name": "kdm-auto-download-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "kdm": "tsx src/cli.ts",
+    "kdm:json": "tsx src/cli.ts --json",
+    "start": "tsx src/cli.ts",
+    "login": "tsx src/cli.ts login",
+    "test:model": "tsx src/test-model.ts"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "onnxruntime-node": "^1.20.1",
+    "playwright": "^1.49.1",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

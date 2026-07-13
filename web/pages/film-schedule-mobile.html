@@ -1,0 +1,187 @@
+<div class="film-schedule-mobile-page" id="filmScheduleMobileRoot">
+  <section class="film-schedule-mobile-controls" aria-label="排期筛选">
+    <label class="film-schedule-mobile-date">
+      <span>日期</span>
+      <div>
+        <input id="filmScheduleMobileDateInput" type="date" class="input input-bordered input-sm">
+        <button id="filmScheduleMobileRefreshBtn" class="btn btn-ghost btn-sm btn-circle" aria-label="刷新">
+          <i class="fas fa-rotate"></i>
+        </button>
+      </div>
+    </label>
+
+    <div class="film-schedule-mobile-source" role="tablist" aria-label="排期来源">
+      <button type="button" class="is-active" data-schedule-mobile-source="ticketing">售票系统排期</button>
+      <button type="button" data-schedule-mobile-source="preview">排期预览</button>
+    </div>
+
+    <div id="filmScheduleMobileHallFilter" class="film-schedule-mobile-hall-filter" aria-label="影厅筛选"></div>
+  </section>
+
+  <section id="filmScheduleMobileNotice" class="film-schedule-mobile-notice hidden" aria-live="polite"></section>
+
+  <main class="film-schedule-mobile-results">
+    <div class="film-schedule-mobile-results-head">
+      <div>
+        <h2 id="filmScheduleMobileTitle">售票系统排期</h2>
+        <p id="filmScheduleMobileSubtitle">--</p>
+      </div>
+      <span id="filmScheduleMobileCount" class="film-schedule-mobile-count">--</span>
+      <button id="filmScheduleMobileCustomBtn" type="button" class="btn btn-primary btn-sm hidden">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+    <div id="filmScheduleMobileContent" class="film-schedule-mobile-content"></div>
+  </main>
+
+  <dialog id="filmScheduleMobileManagedDialog" class="modal">
+    <div class="modal-box film-schedule-mobile-managed-dialog">
+      <div class="film-schedule-mobile-managed-dialog-head">
+        <div>
+          <h3>开启自动托管</h3>
+          <p><span id="filmScheduleMobileManagedHallName">--</span> · 自动同步售票系统有人场次</p>
+        </div>
+        <button id="filmScheduleMobileManagedCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmScheduleMobileManagedForm" class="film-schedule-mobile-managed-form">
+        <div class="film-schedule-mobile-managed-notice">
+          <i class="fas fa-robot"></i>
+          <span>开启托管后，将自动添加已售票的场次（已添加过的场次如果变为空场则会被移除）。</span>
+        </div>
+        <label class="film-schedule-mobile-managed-check">
+          <input id="filmScheduleMobileManagedAlignFeatureInput" type="checkbox" class="checkbox checkbox-sm" checked>
+          <span>
+            <strong>对齐正片时间</strong>
+            <small>启用后，会提前放映贴片广告，使正片能对齐到开场时间</small>
+          </span>
+        </label>
+        <div class="film-schedule-mobile-managed-check is-time-limit">
+          <input id="filmScheduleMobileManagedAutoDisableEnabledInput" type="checkbox" class="checkbox checkbox-sm" checked>
+          <div>
+            <label for="filmScheduleMobileManagedAutoDisableEnabledInput">
+              <strong>托管时限</strong>
+            </label>
+            <small>启用后会在指定时间关闭托管</small>
+            <label class="film-schedule-mobile-managed-time">
+              <span>关闭时间</span>
+              <input id="filmScheduleMobileManagedAutoDisableInput" type="datetime-local" class="input input-bordered input-sm">
+            </label>
+          </div>
+        </div>
+        <div id="filmScheduleMobileManagedError" class="text-error text-xs hidden"></div>
+        <div class="modal-action">
+          <button id="filmScheduleMobileManagedCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+          <button id="filmScheduleMobileManagedSaveBtn" type="submit" class="btn btn-primary btn-sm">开启托管</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="filmScheduleMobileAddDialog" class="modal">
+    <div class="modal-box film-schedule-mobile-add-dialog">
+      <div class="film-schedule-mobile-add-dialog-head">
+        <div>
+          <h3 id="filmScheduleMobileAddTitle">添加排期</h3>
+          <p id="filmScheduleMobileAddSubtitle">--</p>
+        </div>
+        <button id="filmScheduleMobileAddCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmScheduleMobileAddForm" class="film-schedule-mobile-add-form">
+        <div id="filmScheduleMobileAddSessionSummary" class="film-schedule-mobile-add-summary"></div>
+        <label class="film-schedule-mobile-add-field">
+          <span>影片放映模板</span>
+          <select id="filmScheduleMobileAddRuleSelect" class="select select-bordered select-sm" required></select>
+        </label>
+        <label class="film-schedule-mobile-add-field">
+          <span>影厅</span>
+          <select id="filmScheduleMobileAddHallSelect" class="select select-bordered select-sm" required></select>
+        </label>
+        <label class="film-schedule-mobile-add-field">
+          <span>开始时间</span>
+          <input id="filmScheduleMobileAddStartInput" type="datetime-local" step="1" class="input input-bordered input-sm" required>
+        </label>
+        <div id="filmScheduleMobileAddHallWarning" class="film-schedule-mobile-add-warning hidden"></div>
+        <div class="film-schedule-mobile-add-estimate">
+          <span>预计时长</span>
+          <strong id="filmScheduleMobileAddEstimate">--</strong>
+        </div>
+        <div id="filmScheduleMobileAddRulePreview"></div>
+        <label class="film-schedule-mobile-managed-check">
+          <input id="filmScheduleMobileAddAlignFeatureInput" type="checkbox" class="checkbox checkbox-sm" checked>
+          <span>
+            <strong>对齐正片时间</strong>
+            <small id="filmScheduleMobileAddAlignFeatureText">启用后，会提前放映贴片广告，使正片能对齐到开场时间</small>
+          </span>
+        </label>
+        <label class="film-schedule-mobile-add-field">
+          <span>备注</span>
+          <input id="filmScheduleMobileAddNotesInput" type="text" class="input input-bordered input-sm" maxlength="500">
+        </label>
+        <div id="filmScheduleMobileAddError" class="text-error text-xs hidden"></div>
+        <div class="modal-action">
+          <button id="filmScheduleMobileAddCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+          <button id="filmScheduleMobileAddSaveBtn" type="submit" class="btn btn-primary btn-sm">保存排期</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="filmScheduleMobileEditDialog" class="modal">
+    <div class="modal-box film-schedule-mobile-add-dialog">
+      <div class="film-schedule-mobile-add-dialog-head">
+        <div>
+          <h3>调整排期</h3>
+          <p id="filmScheduleMobileEditSubtitle">--</p>
+        </div>
+        <button id="filmScheduleMobileEditCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmScheduleMobileEditForm" class="film-schedule-mobile-add-form">
+        <label class="film-schedule-mobile-add-field">
+          <span>影片放映模板</span>
+          <select id="filmScheduleMobileEditRuleSelect" class="select select-bordered select-sm" required></select>
+        </label>
+        <label class="film-schedule-mobile-add-field">
+          <span>影厅</span>
+          <select id="filmScheduleMobileEditHallSelect" class="select select-bordered select-sm" required></select>
+        </label>
+        <label class="film-schedule-mobile-add-field">
+          <span>开始时间</span>
+          <input id="filmScheduleMobileEditStartInput" type="datetime-local" step="1" class="input input-bordered input-sm" required>
+        </label>
+        <div id="filmScheduleMobileEditHallWarning" class="film-schedule-mobile-add-warning hidden"></div>
+        <div class="film-schedule-mobile-add-estimate">
+          <span>预计时长</span>
+          <strong id="filmScheduleMobileEditEstimate">--</strong>
+        </div>
+        <div id="filmScheduleMobileEditRulePreview"></div>
+        <label class="film-schedule-mobile-add-field">
+          <span>备注</span>
+          <input id="filmScheduleMobileEditNotesInput" type="text" class="input input-bordered input-sm" maxlength="500">
+        </label>
+        <div id="filmScheduleMobileEditError" class="text-error text-xs hidden"></div>
+        <div id="filmScheduleMobileEditDeleteWarning" class="film-schedule-mobile-delete-warning hidden">
+          <div class="film-schedule-mobile-add-warning is-danger">
+            删除排期会退出当前排程的播放监控，后续自动化动作将不会执行；当前播放仍会继续。
+          </div>
+          <p id="filmScheduleMobileEditDeleteMeta"></p>
+          <div>
+            <button id="filmScheduleMobileEditDeleteCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+            <button id="filmScheduleMobileEditDeleteConfirmBtn" type="button" class="btn btn-error btn-sm">确认删除</button>
+          </div>
+        </div>
+        <div class="modal-action film-schedule-mobile-edit-actions">
+          <button id="filmScheduleMobileEditDeleteBtn" type="button" class="btn btn-ghost btn-sm text-error">删除</button>
+          <span></span>
+          <button id="filmScheduleMobileEditCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+          <button id="filmScheduleMobileEditSaveBtn" type="submit" class="btn btn-primary btn-sm">保存调整</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+</div>

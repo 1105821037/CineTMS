@@ -1,0 +1,153 @@
+<section id="storageSettingsRoot" class="storage-console view-stack">
+  <div class="storage-console-head">
+    <span>Repository Gateway</span>
+    <h3>存储库与 FTP</h3>
+  </div>
+
+  <div id="systemSettingsStatus" class="alert alert-error hidden">
+    <i class="fas fa-circle-xmark"></i>
+    <span></span>
+  </div>
+
+  <section id="storageServiceHero" class="storage-service-hero" data-state="unknown">
+    <div class="storage-service-orb" aria-hidden="true">
+      <span></span>
+      <i class="fas fa-network-wired"></i>
+    </div>
+    <div class="storage-service-main">
+      <div class="storage-service-kicker">
+        <span id="ftpBadge" class="badge badge-outline">未知</span>
+        <span id="ftpAccessSummary">等待服务状态</span>
+      </div>
+      <div id="ftpEndpoint" class="storage-endpoint">ftp://--</div>
+      <p id="ftpServiceMessage">配置仓库后，TMS 会把这个目录作为放映内容入口。</p>
+    </div>
+    <button id="ftpCopyEndpoint" class="btn btn-sm storage-copy-btn" type="button" disabled>
+      <i class="fas fa-copy"></i>
+      复制地址
+    </button>
+  </section>
+
+  <form id="storageForm" class="storage-flow">
+    <section class="storage-path-stage">
+      <div class="storage-stage-icon" aria-hidden="true">
+        <i class="fas fa-folder-tree"></i>
+      </div>
+      <div class="storage-stage-body">
+        <div class="storage-stage-label">内容仓库</div>
+        <div class="storage-path-picker">
+          <label class="storage-path-field">
+            <input id="repositoryPath" class="input input-bordered" placeholder="D:\TMS\Repository" autocomplete="off">
+          </label>
+          <button id="openRepositoryPicker" class="btn storage-picker-button" type="button">
+            <i class="fas fa-folder-open"></i>
+            选择文件夹
+          </button>
+        </div>
+        <p>这个目录会成为 DCP/KDM 等内容资产的根位置，保存后 FTP 服务会使用新的根目录。</p>
+        <div id="repositoryCapacityPanel" class="storage-capacity-panel">
+          <div class="storage-capacity-head">
+            <span>存储容量</span>
+            <strong id="repositoryCapacityValue">正在读取</strong>
+          </div>
+          <progress id="repositoryCapacityProgress" class="progress progress-primary" value="0" max="100"></progress>
+          <div id="repositoryCapacityDesc" class="storage-capacity-desc">等待存储库容量数据。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="storage-access-stage">
+      <div class="storage-access-intro">
+        <div class="storage-stage-label">放映机如何抵达这里</div>
+        <p id="projectorAccessHint">普通单网卡环境可以自动检测；Docker、NAT、双网卡或跨网段时，请手动指定放映机能访问到的本机地址。</p>
+      </div>
+      <div class="storage-access-switch" role="radiogroup" aria-label="放映机访问方式">
+        <label>
+          <input type="radio" name="storageAccessMode" value="auto" checked>
+          <span><i class="fas fa-wand-magic-sparkles"></i>自动检测</span>
+        </label>
+        <label>
+          <input type="radio" name="storageAccessMode" value="manual">
+          <span><i class="fas fa-location-crosshairs"></i>手动指定</span>
+        </label>
+      </div>
+      <label class="storage-host-field">
+        <span>访问地址</span>
+        <input id="projectorAccessHost" class="input input-bordered" inputmode="url" autocomplete="off" aria-describedby="projectorAccessHint">
+      </label>
+    </section>
+
+    <div class="storage-save-row">
+      <button id="storageSubmit" type="submit" class="btn btn-primary">
+        <i class="fas fa-floppy-disk"></i>
+        保存存储配置
+      </button>
+    </div>
+  </form>
+
+  <div id="repositoryPickerModal" class="storage-picker-modal hidden" role="dialog" aria-modal="true" aria-labelledby="repositoryPickerTitle">
+    <div class="storage-picker-backdrop" data-picker-close></div>
+    <section class="storage-picker-panel">
+      <header class="storage-picker-head">
+        <div>
+          <span>Server Directory</span>
+          <h4 id="repositoryPickerTitle">选择服务器文件夹</h4>
+        </div>
+        <button class="btn btn-ghost btn-sm btn-circle" type="button" data-picker-close aria-label="关闭文件夹选择器">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </header>
+      <div class="storage-picker-location">
+        <span id="repositoryPickerCurrentLabel">当前位置</span>
+        <code id="repositoryPickerCurrentPath">/</code>
+      </div>
+      <div class="storage-picker-actions">
+        <button id="repositoryPickerRoot" class="btn btn-sm" type="button">
+          <i class="fas fa-hard-drive"></i>
+          根目录
+        </button>
+        <button id="repositoryPickerUp" class="btn btn-sm" type="button">
+          <i class="fas fa-arrow-up"></i>
+          上一级
+        </button>
+        <button id="repositoryPickerNewFolder" class="btn btn-sm" type="button">
+          <i class="fas fa-folder-plus"></i>
+          新建文件夹
+        </button>
+      </div>
+      <div id="repositoryPickerCreate" class="storage-picker-create hidden">
+        <input id="repositoryPickerFolderName" class="input input-bordered input-sm" placeholder="输入新文件夹名称" autocomplete="off">
+        <button id="repositoryPickerCreateConfirm" class="btn btn-primary btn-sm" type="button">
+          <i class="fas fa-check"></i>
+          创建
+        </button>
+        <button id="repositoryPickerCreateCancel" class="btn btn-ghost btn-sm" type="button">取消</button>
+      </div>
+      <div id="repositoryPickerList" class="storage-picker-list">
+        <div class="storage-picker-empty">
+          <span class="loading loading-spinner loading-sm"></span>
+          正在读取目录
+        </div>
+      </div>
+      <footer class="storage-picker-footer">
+        <button class="btn" type="button" data-picker-close>取消</button>
+        <button id="repositoryPickerUse" class="btn btn-primary" type="button">
+          <i class="fas fa-check"></i>
+          使用当前目录
+        </button>
+      </footer>
+    </section>
+  </div>
+
+  <details class="storage-diagnostics">
+    <summary>
+      <span><i class="fas fa-sliders"></i>连接诊断</span>
+      <i class="fas fa-chevron-down"></i>
+    </summary>
+    <div id="ftpMeta" class="storage-diagnostic-grid"></div>
+    <div id="ftpWarning" class="alert alert-warning hidden">
+      <i class="fas fa-triangle-exclamation"></i>
+      <span></span>
+    </div>
+  </details>
+</section>

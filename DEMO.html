@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TMS影院管理系统</title>
+
+    <!-- Tailwind CSS + DaisyUI -->
+    <link href="./web/assets/vendor/daisyui/daisyui.min.css" rel="stylesheet" type="text/css" />
+    <link href="./web/assets/vendor/daisyui/themes.css" rel="stylesheet" type="text/css" />
+    <script src="./web/assets/vendor/tailwindcss/tailwind-browser.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="./web/assets/vendor/fontawesome/css/all.min.css">
+
+    <style>
+        /* 移动端优化样式 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 侧边栏动画优化 */
+        .sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 40;
+        }
+
+        /* 遮罩层 */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 30;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 活动导航项样式 */
+        .nav-item.active {
+            background-color: hsl(var(--p) / 0.2);
+        }
+
+        /* 内容区动画 */
+        .content-fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 移动端触摸优化 */
+        @media (max-width: 768px) {
+            .nav-item, button, a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            /* 头部固定优化 */
+            header {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+            }
+
+            /* 内容区域适配 */
+            main {
+                padding: 1rem !important;
+            }
+
+            /* 卡片间距优化 */
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* 小屏幕字体优化 */
+        @media (max-width: 640px) {
+            .text-responsive {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* 防止iOS Safari底部栏覆盖 */
+        @supports (padding: max(0px)) {
+            .main-container {
+                padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body class="bg-base-200">
+
+<!-- 侧边栏遮罩层 -->
+<div id="sidebarOverlay" class="sidebar-overlay md:hidden"></div>
+
+<!-- 主容器 -->
+<div class="flex h-screen overflow-hidden">
+
+    <!-- 侧边导航栏 -->
+    <aside id="sidebar" class="sidebar w-64 bg-base-100 shadow-xl flex flex-col">
+        <!-- Logo区域 -->
+        <div class="p-4 md:p-6 border-b border-base-300">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-film text-primary-content"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold">TMS系统</h1>
+                        <p class="text-xs text-base-content/60">影院管理平台</p>
+                    </div>
+                </div>
+                <!-- 移动端关闭按钮 -->
+                <button id="sidebarClose" class="btn btn-ghost btn-sm btn-circle md:hidden">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 导航菜单 -->
+        <nav class="flex-1 overflow-y-auto p-3 md:p-4">
+            <ul class="menu space-y-1">
+                <li>
+                    <a href="#/home" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors active:scale-95" data-page="home">
+                        <i class="fas fa-home flex-shrink-0"></i>
+                        <span>首页</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#/cinema" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors active:scale-95" data-page="cinema">
+                        <i class="fas fa-video flex-shrink-0"></i>
+                        <span>影厅管理</span>
+                    </a>
+                </li>
+
+                <!-- 资产管理 - 可折叠 -->
+                <li>
+                    <details open>
+                        <summary class="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors">
+                            <i class="fas fa-box flex-shrink-0"></i>
+                            <span>资产管理</span>
+                        </summary>
+                        <ul class="ml-2 mt-1 space-y-1">
+                            <li>
+                                <a href="#/kdm" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="kdm">
+                                    <i class="fas fa-key flex-shrink-0 text-sm"></i>
+                                    <span>KDM管理</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/dcp" class="nav-item flex items-center space-x-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors text-sm active:scale-95" data-page="dcp">
+                                    <i class="fas fa-hard-drive flex-shrink-0 text-sm"></i>
+                                    <span>DCP管理</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </details>
+                </li>
+
+                <li>
+                    <a href="#/settings" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors active:scale-95" data-page="settings">
+                        <i class="fas fa-cog flex-shrink-0"></i>
+                        <span>系统设置</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#/about" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-base-200 transition-colors active:scale-95" data-page="about">
+                        <i class="fas fa-info-circle flex-shrink-0"></i>
+                        <span>关于系统</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 底部用户信息 -->
+        <div class="p-3 md:p-4 border-t border-base-300">
+            <div class="flex items-center space-x-3">
+                <div class="avatar placeholder flex-shrink-0">
+                    <div class="bg-primary text-primary-content rounded-full w-10">
+                        <span class="text-sm">管理</span>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">管理员</p>
+                    <p class="text-xs text-base-content/60 truncate">admin@tms.com</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 右侧主内容区 -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- 顶部栏 -->
+        <header class="bg-base-100 shadow-sm border-b border-base-300">
+            <div class="flex items-center justify-between px-3 md:px-6 py-3 md:py-4">
+                <!-- 左侧:菜单按钮(移动端)和面包屑 -->
+                <div class="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
+                    <button id="menuToggle" class="btn btn-ghost btn-sm md:hidden flex-shrink-0">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <div class="breadcrumbs text-xs md:text-sm min-w-0">
+                        <ul id="breadcrumb" class="truncate">
+                            <li>首页</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 右侧:主题切换和其他操作 -->
+                <div class="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
+                    <!-- 主题切换器 -->
+                    <div class="dropdown dropdown-end">
+                        <label tabindex="0" class="btn btn-ghost btn-sm gap-1 md:gap-2">
+                            <i class="fas fa-palette"></i>
+                            <span class="hidden sm:inline text-sm">主题</span>
+                        </label>
+                        <ul tabindex="0" class="dropdown-content z-[1] p-2 shadow-2xl bg-base-100 rounded-box w-48 md:w-52 max-h-80 md:max-h-96 overflow-y-auto">
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="system">
+                                <i class="fas fa-desktop mr-2"></i>跟随系统
+                            </button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="light">
+                                <i class="fas fa-sun mr-2"></i>浅色模式
+                            </button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="dark">
+                                <i class="fas fa-moon mr-2"></i>深色模式
+                            </button></li>
+                            <div class="divider my-2 text-xs">预设主题</div>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="cupcake">Cupcake</button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="corporate">Corporate</button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="synthwave">Synthwave</button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="retro">Retro</button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="cyberpunk">Cyberpunk</button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="valentine">Valentine</button></li>
+                            <li><button class="theme-option w-full text-left p-2.5 rounded hover:bg-base-200 transition-colors active:scale-95 text-sm" data-theme="aqua">Aqua</button></li>
+                        </ul>
+                    </div>
+
+                    <!-- 通知 -->
+                    <button class="btn btn-ghost btn-sm btn-circle">
+                        <div class="indicator">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-xs badge-primary indicator-item"></span>
+                        </div>
+                    </button>
+
+                    <!-- 全屏切换 - 桌面端显示 -->
+                    <button id="fullscreenToggle" class="btn btn-ghost btn-sm btn-circle hidden lg:flex">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 内容区 -->
+        <main id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-6 main-container">
+            <!-- 动态加载的内容将显示在这里 -->
+            <div class="content-fade-in">
+                <div class="flex items-center justify-center h-full">
+                    <span class="loading loading-spinner loading-lg text-primary"></span>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // 路由系统
+    const routes = {
+        'home': './pages/home.html',
+        'cinema': './pages/cinema.html',
+        'kdm': './pages/kdm.html',
+        'dcp': './pages/dcp.html',
+        'settings': './pages/settings.html',
+        'about': './pages/about.html'
+    };
+
+    // 页面标题映射
+    const pageTitles = {
+        'home': '首页',
+        'cinema': '影厅管理',
+        'kdm': 'KDM管理',
+        'dcp': 'DCP管理',
+        'settings': '系统设置',
+        'about': '关于系统'
+    };
+
+    // 加载页面内容
+    async function loadPage(page) {
+        const contentArea = document.getElementById('contentArea');
+        const breadcrumb = document.getElementById('breadcrumb');
+
+        // 显示加载状态
+        contentArea.innerHTML = `
+            <div class="flex items-center justify-center h-full">
+                <span class="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(routes[page]);
+            if (response.ok) {
+                const html = await response.text();
+                contentArea.innerHTML = `<div class="content-fade-in">${html}</div>`;
+
+                // 更新面包屑
+                breadcrumb.innerHTML = `<li><a href="#/home">首页</a></li><li>${pageTitles[page]}</li>`;
+
+                // 更新活动导航项
+                updateActiveNav(page);
+
+                // 如果页面有初始化函数,执行它
+                if (typeof window.initPage === 'function') {
+                    window.initPage();
+                }
+
+                // 滚动到顶部
+                contentArea.scrollTop = 0;
+            } else {
+                throw new Error('页面加载失败');
+            }
+        } catch (error) {
+            contentArea.innerHTML = `
+                <div class="content-fade-in">
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span class="text-sm">页面加载失败: ${error.message}</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // 更新活动导航项
+    function updateActiveNav(page) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.page === page) {
+                item.classList.add('active');
+            }
+        });
+    }
+
+    // 哈希路由处理
+    function handleRoute() {
+        const hash = window.location.hash.slice(2) || 'home';
+        const page = hash.split('/')[0];
+
+        if (routes[page]) {
+            loadPage(page);
+        } else {
+            loadPage('home');
+        }
+
+        // 移动端路由切换时关闭侧边栏
+        if (window.innerWidth < 768) {
+            closeSidebar();
+        }
+    }
+
+    // 监听路由变化
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('load', handleRoute);
+
+    // 主题管理
+    class ThemeManager {
+        constructor() {
+            this.currentTheme = localStorage.getItem('theme') || 'system';
+            this.init();
+        }
+
+        init() {
+            this.applyTheme(this.currentTheme);
+
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (this.currentTheme === 'system') {
+                        this.applySystemTheme();
+                    }
+                });
+            }
+
+            document.querySelectorAll('.theme-option').forEach(button => {
+                button.addEventListener('click', () => {
+                    const theme = button.dataset.theme;
+                    this.setTheme(theme);
+                });
+            });
+        }
+
+        setTheme(theme) {
+            this.currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            this.applyTheme(theme);
+        }
+
+        applyTheme(theme) {
+            const html = document.documentElement;
+
+            if (theme === 'system') {
+                this.applySystemTheme();
+            } else {
+                html.setAttribute('data-theme', theme);
+            }
+        }
+
+        applySystemTheme() {
+            const html = document.documentElement;
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        }
+    }
+
+    // 初始化主题管理器
+    const themeManager = new ThemeManager();
+
+    // 侧边栏控制
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebarClose = document.getElementById('sidebarClose');
+
+    function openSidebar() {
+        sidebar.classList.add('active');
+        sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openSidebar);
+    sidebarClose.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // 导航链接点击时关闭移动端菜单
+    document.querySelectorAll('.nav-item').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+        });
+    });
+
+    // 全屏切换
+    const fullscreenToggle = document.getElementById('fullscreenToggle');
+    if (fullscreenToggle) {
+        fullscreenToggle.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                fullscreenToggle.querySelector('i').className = 'fas fa-compress';
+            } else {
+                document.exitFullscreen();
+                fullscreenToggle.querySelector('i').className = 'fas fa-expand';
+            }
+        });
+    }
+
+    // 监听全屏变化
+    document.addEventListener('fullscreenchange', () => {
+        const icon = fullscreenToggle?.querySelector('i');
+        if (icon) {
+            if (document.fullscreenElement) {
+                icon.className = 'fas fa-compress';
+            } else {
+                icon.className = 'fas fa-expand';
+            }
+        }
+    });
+
+    // 窗口大小变化时处理
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (window.innerWidth >= 768) {
+                closeSidebar();
+            }
+        }, 250);
+    });
+</script>
+</body>
+</html>

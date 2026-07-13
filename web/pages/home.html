@@ -1,0 +1,184 @@
+<div id="homeOverviewPage" class="home-overview-shell" data-bound="false">
+  <section class="home-page-head">
+    <div>
+      <h2 class="home-page-title text-3xl font-bold">欢迎回来</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        CineTMS影院放映管理系统 - 实时监控与管理
+      </p>
+    </div>
+
+    <div class="home-page-actions flex flex-wrap items-center gap-3">
+      <div id="homeOverviewLastUpdated" class="text-sm text-base-content/60">等待数据...</div>
+      <button
+        id="homeOverviewRefresh"
+        type="button"
+        class="btn btn-primary btn-sm gap-2"
+        aria-label="刷新影厅状态"
+      >
+        <i class="fas fa-rotate"></i>
+        刷新状态
+      </button>
+    </div>
+  </section>
+
+  <section id="homeOverviewError" class="hidden"></section>
+
+  <section id="homeConfigReminders" class="home-config-reminders hidden" aria-label="配置提醒"></section>
+
+  <section id="homeOverviewStats" class="home-overview-stats-grid">
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-info">
+          <i class="fas fa-plug-circle-check text-2xl"></i>
+        </div>
+        <div class="stat-title">在线影厅</div>
+        <div class="stat-value text-info">-</div>
+        <div class="stat-desc">GDC 连接正常</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-success">
+          <i class="fas fa-circle-play text-2xl"></i>
+        </div>
+        <div class="stat-title">正在放映</div>
+        <div class="stat-value text-success">-</div>
+        <div class="stat-desc">当前活跃播放中的影厅</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <i class="fas fa-key text-2xl"></i>
+        </div>
+        <div class="stat-title">KDM数量</div>
+        <div class="stat-value text-primary">-</div>
+        <div class="stat-desc">存储库密钥文件</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <i class="fas fa-box-archive text-2xl"></i>
+        </div>
+        <div class="stat-title">DCP数量</div>
+        <div class="stat-value text-warning">-</div>
+        <div class="stat-desc">存储库影片包</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-overview-main">
+    <div class="card bg-base-100 shadow-xl home-runtime-panel">
+      <div class="card-body">
+        <div class="home-runtime-head flex items-end justify-between gap-3">
+          <div>
+            <h3 class="card-title text-xl">
+              <i class="fas fa-chart-line"></i>
+              影厅实时状态
+            </h3>
+<!--            <p class="mt-1 text-sm text-base-content/65"></p>-->
+          </div>
+          <div id="homeOverviewSummary" class="text-sm text-base-content/60"></div>
+        </div>
+
+        <div id="homeOverviewEmpty" class="alert alert-info hidden mt-4">
+          <i class="fas fa-circle-info"></i>
+          <span>暂无已配置影厅，请先在设置向导中完成影厅接入。</span>
+        </div>
+
+        <div class="home-runtime-panel-body">
+          <div id="homeOverviewGrid" class="home-overview-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-side-stack space-y-6">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <div class="home-panel-head">
+            <h3 class="card-title">
+              <i class="fas fa-bell"></i>
+              系统通知
+            </h3>
+            <span id="homeNotificationBadge" class="badge badge-ghost">0</span>
+          </div>
+
+          <div id="homeNotificationList" class="home-notification-list mt-4"></div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title">
+            <i class="fas fa-bolt"></i>
+            快速操作
+          </h3>
+
+          <div class="space-y-2 mt-4">
+            <button class="btn btn-outline btn-sm w-full justify-start gap-2" type="button" disabled>
+              <i class="fas fa-plus"></i>
+              添加新影厅
+            </button>
+            <button class="btn btn-outline btn-sm w-full justify-start gap-2" type="button" disabled>
+              <i class="fas fa-upload"></i>
+              导入DCP
+            </button>
+            <button class="btn btn-outline btn-sm w-full justify-start gap-2" type="button" disabled>
+              <i class="fas fa-key"></i>
+              导入KDM
+            </button>
+            <button class="btn btn-outline btn-sm w-full justify-start gap-2" type="button" disabled>
+              <i class="fas fa-file-lines"></i>
+              生成报表
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h3 class="card-title">
+            <i class="fas fa-database"></i>
+            存储情况
+          </h3>
+
+          <div class="mt-4 space-y-3">
+            <div class="flex justify-between text-sm">
+              <span id="homeRepositoryStorageLabel">存储库容量</span>
+              <span id="homeRepositoryStorageValue" class="font-semibold text-base-content/70">正在读取</span>
+            </div>
+            <progress id="homeRepositoryStorageProgress" class="progress progress-primary" value="0" max="100"></progress>
+            <p id="homeRepositoryStorageDesc" class="text-xs text-base-content/60">等待存储库容量数据。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-xl home-activity-card">
+    <div class="card-body">
+      <h3 class="card-title">
+        <i class="fas fa-clock"></i>
+        最近活动
+      </h3>
+
+      <div class="home-activity-scroll overflow-x-auto mt-4">
+        <table class="table home-activity-table">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>操作</th>
+              <th>对象</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="homeActivityTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

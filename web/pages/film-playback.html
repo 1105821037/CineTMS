@@ -1,0 +1,237 @@
+<div class="film-playback-shell" id="filmPlaybackRoot">
+  <div class="film-playback-head">
+    <div>
+      <h2 class="text-2xl font-bold">影片放映模板</h2>
+      <p class="text-sm text-base-content/60 mt-1">维护影片版本、影厅、播放表与自动放映时间点的模板。</p>
+    </div>
+    <div class="film-playback-actions">
+      <button id="filmPlaybackRefreshBtn" class="btn btn-ghost btn-sm">
+        <i class="fas fa-rotate-right"></i>
+        刷新
+      </button>
+      <button id="filmPlaybackAddBtn" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i>
+        新增模板
+      </button>
+    </div>
+  </div>
+
+  <div id="filmPlaybackError" class="alert alert-error hidden">
+    <i class="fas fa-exclamation-circle"></i>
+    <span></span>
+  </div>
+
+  <div class="film-playback-stats">
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">模板数量</div>
+        <div class="stat-value text-primary" id="filmPlaybackRuleCount">--</div>
+      </div>
+    </div>
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">选择影片</div>
+        <div class="stat-value" id="filmPlaybackFilmCount">--</div>
+      </div>
+    </div>
+    <div class="stats shadow bg-base-100">
+      <div class="stat">
+        <div class="stat-title">覆盖影厅</div>
+        <div class="stat-value" id="filmPlaybackHallCount">--</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="film-playback-list-head">
+      <div>
+        <h3 class="text-lg font-bold">放映模板</h3>
+<!--        <p class="text-sm text-base-content/60">同一影片版本在同一影厅只能存在一条模板。</p>-->
+      </div>
+    </div>
+
+    <div class="collapse collapse-arrow bg-base-100 border border-base-300 film-playback-filter-panel">
+      <input type="checkbox" aria-label="展开筛选条件">
+      <div class="collapse-title film-playback-filter-panel-title">
+        <div>
+          <span class="font-medium">筛选模板</span>
+          <span id="filmPlaybackMobileFilterSummary" class="film-playback-mobile-filter-summary">显示全部模板</span>
+        </div>
+      </div>
+      <div class="collapse-content">
+        <div class="film-playback-filterbar">
+          <label class="film-playback-filter-field film-playback-filter-search">
+            <span>搜索</span>
+            <input id="filmPlaybackSearchInput" type="search" class="input input-bordered input-sm w-full" placeholder="影片名 / filmCd / 播放表" autocomplete="off">
+          </label>
+          <label class="film-playback-filter-field">
+            <span>影厅</span>
+            <select id="filmPlaybackHallFilter" class="select select-bordered select-sm w-full">
+              <option value="">全部影厅</option>
+            </select>
+          </label>
+          <label class="film-playback-filter-field">
+            <span>影片版本</span>
+            <select id="filmPlaybackFilmFilter" class="select select-bordered select-sm w-full">
+              <option value="">全部影片版本</option>
+            </select>
+          </label>
+          <button id="filmPlaybackResetFilterBtn" class="btn btn-ghost btn-sm">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="filmPlaybackTableWrap" class="overflow-x-auto mt-4">
+      <div class="flex justify-center py-8">
+        <span class="loading loading-spinner loading-md text-primary"></span>
+      </div>
+    </div>
+    <div id="filmPlaybackPagination" class="film-playback-pagination hidden">
+      <span id="filmPlaybackPageInfo" class="text-sm text-base-content/60">0-0 / 0</span>
+      <div class="film-playback-pagination-controls">
+        <label class="film-playback-page-size">
+          <span>每页</span>
+          <select id="filmPlaybackPageSize" class="select select-bordered select-xs" aria-label="放映模板每页数量">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </label>
+        <button type="button" class="btn btn-ghost btn-xs" data-film-playback-page-action="prev" aria-label="上一页">
+          <i class="fas fa-chevron-left"></i>
+          <span class="film-playback-pagination-button-text">上一页</span>
+        </button>
+        <span id="filmPlaybackPageNumber" class="film-playback-page-number">1 / 1</span>
+        <button type="button" class="btn btn-ghost btn-xs" data-film-playback-page-action="next" aria-label="下一页">
+          <span class="film-playback-pagination-button-text">下一页</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="filmPlaybackRuleDialog" class="modal">
+    <div class="modal-box film-playback-dialog">
+      <div class="film-playback-dialog-head">
+        <div>
+          <h3 id="filmPlaybackDialogTitle" class="font-bold text-lg">新增放映模板</h3>
+          <p class="text-xs text-base-content/60 mt-1">选择影片版本、适用影厅、播放表和关键时间点。</p>
+        </div>
+        <button id="filmPlaybackDialogCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="filmPlaybackRuleForm" class="film-playback-form">
+        <input id="filmPlaybackRuleId" type="hidden">
+
+        <div class="film-playback-form-grid">
+          <label class="form-control film-playback-wide">
+            <span class="label-text">影片版本</span>
+            <input id="filmPlaybackFilmSelect" type="hidden">
+            <div id="filmPlaybackFilmPicker" class="film-playback-film-picker">
+              <button id="filmPlaybackFilmButton" type="button" class="film-playback-film-button">
+                <span data-role="film-button-label">请选择影片版本</span>
+                <span data-role="film-button-tags" class="film-playback-film-option-tags"></span>
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <div id="filmPlaybackFilmList" class="film-playback-film-options" hidden></div>
+            </div>
+          </label>
+        </div>
+
+        <div class="film-playback-form-section">
+          <div class="film-playback-section-title">
+            <span>适用影厅</span>
+<!--            <small>已被同一影片版本占用的影厅会自动禁用。</small>-->
+          </div>
+          <div id="filmPlaybackHallList" class="film-playback-check-list"></div>
+        </div>
+
+        <div class="film-playback-form-section">
+          <div class="film-playback-section-title">
+            <span>对应播放表</span>
+<!--            <small id="filmPlaybackPlaylistHint">选择影厅后加载可用播放表。</small>-->
+          </div>
+          <select id="filmPlaybackPlaylistSelect" class="select select-bordered select-sm w-full" required disabled></select>
+          <div id="filmPlaybackPlaylistCheck" class="film-playback-playlist-check"></div>
+        </div>
+
+        <div class="collapse collapse-arrow film-playback-time-panel">
+          <input type="checkbox" checked aria-label="折叠时间点信息">
+          <div class="collapse-title film-playback-time-summary">
+            <span>时间点信息</span>
+          </div>
+          <div class="collapse-content">
+            <div class="film-playback-time-toolbar">
+              <button id="filmPlaybackAddTimePointBtn" type="button" class="btn btn-ghost btn-xs">
+                <i class="fas fa-plus"></i>
+                新增时间点信息
+              </button>
+            </div>
+            <div id="filmPlaybackTimePointList" class="film-playback-time-point-list"></div>
+          </div>
+        </div>
+
+        <div id="filmPlaybackFormError" class="text-error text-xs hidden"></div>
+
+        <div class="modal-action">
+          <button type="button" id="filmPlaybackCancelBtn" class="btn btn-ghost btn-sm">取消</button>
+          <button type="submit" id="filmPlaybackSaveBtn" class="btn btn-primary btn-sm">保存模板</button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <dialog id="filmPlaybackHttpDialog" class="modal">
+    <div class="modal-box film-playback-http-dialog">
+      <div class="film-playback-dialog-head">
+        <h3 class="font-bold text-lg">HTTP 请求配置</h3>
+        <button type="button" id="filmPlaybackHttpCloseBtn" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmPlaybackHttpForm" class="film-playback-http-form">
+        <div class="film-playback-http-grid">
+          <label class="form-control">
+            <span class="label-text">请求方法</span>
+            <select id="filmPlaybackHttpMethod" class="select select-bordered select-sm">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+          </label>
+          <label class="form-control film-playback-http-url">
+            <span class="label-text">URL</span>
+            <input id="filmPlaybackHttpUrl" type="url" class="input input-bordered input-sm" placeholder="https://example.com/callback">
+          </label>
+          <label class="form-control">
+            <span class="label-text">超时（秒）</span>
+            <input id="filmPlaybackHttpTimeout" type="number" min="1" max="120" step="1" class="input input-bordered input-sm" value="10">
+          </label>
+        </div>
+        <label class="form-control">
+          <span class="label-text">请求头</span>
+          <textarea id="filmPlaybackHttpHeaders" class="textarea textarea-bordered textarea-sm" rows="4" placeholder='每行一个：Content-Type: application/json'></textarea>
+        </label>
+        <label class="form-control">
+          <span class="label-text">Query 参数</span>
+          <textarea id="filmPlaybackHttpQuery" class="textarea textarea-bordered textarea-sm" rows="3" placeholder="每行一个：key=value"></textarea>
+        </label>
+        <label class="form-control">
+          <span class="label-text">请求体</span>
+          <textarea id="filmPlaybackHttpBody" class="textarea textarea-bordered textarea-sm" rows="6" placeholder='JSON 或原始文本'></textarea>
+        </label>
+        <div id="filmPlaybackHttpError" class="text-error text-xs hidden"></div>
+        <div class="modal-action">
+          <button type="button" id="filmPlaybackHttpCancelBtn" class="btn btn-ghost btn-sm">取消</button>
+          <button type="submit" class="btn btn-primary btn-sm">保存配置</button>
+        </div>
+      </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+</div>

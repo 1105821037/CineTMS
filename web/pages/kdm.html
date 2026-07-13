@@ -1,0 +1,401 @@
+<div class="kdm-shell kdm-repository-shell">
+  <section class="kdm-page-head">
+    <div>
+      <h2 class="kdm-page-title text-3xl font-bold">KDM 密钥管理</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        管理CineTMS内置存储库的密钥
+      </p>
+    </div>
+
+    <div class="kdm-page-actions flex flex-wrap items-center gap-3">
+      <button id="kdmRefreshButton" type="button" class="btn btn-ghost btn-sm gap-2" aria-label="刷新列表">
+        <i class="fas fa-rotate"></i>
+        刷新
+      </button>
+      <button id="kdmZyhxOpen" type="button" class="btn btn-secondary btn-sm gap-2 kdm-zyhx-open-button">
+        <img src="/assets/images/zyhx-favicon.ico" alt="" class="kdm-zyhx-button-icon">
+        中影华夏密钥下载
+        <span class="kdm-zyhx-beta-badge">Beta</span>
+      </button>
+      <button id="kdmUploadTrigger" type="button" class="btn btn-primary btn-sm gap-2">
+        <i class="fas fa-upload"></i>
+        上传 KDM
+      </button>
+    </div>
+  </section>
+
+  <input id="kdmUploadInput" type="file" class="hidden" accept=".xml,.zip" multiple>
+
+  <dialog id="kdmUploadQueueModal" class="modal">
+    <div class="modal-box kdm-upload-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">KDM 上传队列</h3>
+          <p id="kdmUploadQueueSummary" class="mt-1 text-sm text-base-content/60">暂无待上传文件</p>
+        </div>
+        <button id="kdmUploadQueueClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭上传队列">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div id="kdmUploadQueueList" class="kdm-upload-queue-list">
+        <div class="kdm-upload-queue-empty">拖拽 KDM 文件到页面，或点击“继续添加”选择文件。</div>
+      </div>
+      <div class="modal-action kdm-upload-modal-actions">
+        <button id="kdmUploadQueueAdd" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-plus"></i>
+          继续添加
+        </button>
+        <button id="kdmUploadQueueClear" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-trash-can"></i>
+          清空队列
+        </button>
+        <div class="flex-1"></div>
+        <button id="kdmUploadQueueCancel" type="button" class="btn btn-sm btn-ghost">取消</button>
+        <button id="kdmUploadQueueConfirm" type="button" class="btn btn-sm btn-primary gap-2">
+          <i class="fas fa-cloud-arrow-up"></i>
+          确定上传
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button id="kdmUploadQueueBackdrop">close</button></form>
+  </dialog>
+
+  <dialog id="kdmZyhxModal" class="modal">
+    <div class="modal-box max-w-6xl kdm-zyhx-modal-box">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 class="text-lg font-bold">中影华夏密钥下载</h3>
+          <p id="kdmZyhxSummary" class="mt-1 text-sm text-base-content/60">正在准备密钥列表</p>
+        </div>
+        <button id="kdmZyhxClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="kdmZyhxStatus" class="alert alert-info mt-4">
+        <i class="fas fa-circle-info"></i>
+        <span>打开后会自动拉取密钥列表。</span>
+      </div>
+
+      <div class="collapse collapse-arrow bg-base-100 border border-base-300 kdm-zyhx-filter-panel">
+        <input type="checkbox" aria-label="展开筛选条件">
+        <div class="collapse-title kdm-zyhx-filter-title">
+          <div>
+            <span class="font-medium">筛选密钥</span>
+            <span id="kdmZyhxMobileSummary" class="kdm-zyhx-mobile-summary">准备拉取密钥列表</span>
+          </div>
+        </div>
+        <div class="collapse-content">
+          <div class="kdm-zyhx-filterbar">
+            <label class="form-control">
+              <div class="label"><span class="label-text">搜索</span></div>
+              <input id="kdmZyhxKeyword" type="search" class="input input-bordered input-sm" placeholder="密钥 ID、影片名、PID、批次">
+            </label>
+            <label class="form-control">
+              <div class="label"><span class="label-text">下载状态</span></div>
+              <select id="kdmZyhxDownloaded" class="select select-bordered select-sm">
+                <option value="">全部</option>
+                <option value="0">未下载</option>
+                <option value="1">已下载</option>
+              </select>
+            </label>
+            <button id="kdmZyhxSearch" type="button" class="btn btn-sm btn-ghost gap-2">
+              <i class="fas fa-magnifying-glass"></i>
+              搜索
+            </button>
+            <button id="kdmZyhxRefresh" type="button" class="btn btn-sm btn-ghost gap-2">
+              <i class="fas fa-rotate"></i>
+              刷新
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-box border border-base-300 kdm-zyhx-table-scroll">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>影片名称</th>
+              <th>有效期</th>
+              <th>密钥详情</th>
+              <th>密钥数量</th>
+              <th>状态</th>
+              <th class="text-right">操作</th>
+            </tr>
+          </thead>
+          <tbody id="kdmZyhxTableBody">
+            <tr><td colspan="7" class="text-center text-base-content/60 py-6">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3 kdm-zyhx-pagination">
+        <div id="kdmZyhxPageInfo" class="text-sm text-base-content/60">第 1 页</div>
+        <div class="flex items-center gap-2">
+          <select id="kdmZyhxPageSize" class="select select-bordered select-sm w-24" aria-label="每页条数">
+            <option value="20">20 / 页</option>
+            <option value="50">50 / 页</option>
+            <option value="100">100 / 页</option>
+          </select>
+          <button id="kdmZyhxPrevPage" type="button" class="btn btn-sm btn-ghost" aria-label="上一页">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button id="kdmZyhxNextPage" type="button" class="btn btn-sm btn-ghost" aria-label="下一页">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button id="kdmZyhxBackdrop">close</button></form>
+  </dialog>
+
+  <dialog id="kdmZyhxDetailModal" class="modal">
+    <div class="modal-box max-w-5xl kdm-zyhx-detail-modal-box">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 id="kdmZyhxDetailTitle" class="text-lg font-bold">密钥详情</h3>
+          <p id="kdmZyhxDetailSummary" class="mt-1 text-sm text-base-content/60"></p>
+        </div>
+        <button id="kdmZyhxDetailClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div id="kdmZyhxDetailBody" class="mt-4 kdm-zyhx-detail-scroll"></div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button id="kdmZyhxDetailBackdrop">close</button></form>
+  </dialog>
+
+  <section id="kdmUploadStatus" class="alert alert-info">
+    <i class="fas fa-circle-info"></i>
+    <span>选择或拖拽 KDM 文件后加入上传队列。</span>
+  </section>
+
+  <section class="kdm-stats-grid">
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <i class="fas fa-key text-2xl"></i>
+        </div>
+        <div class="stat-title">已上传KDM</div>
+        <div id="kdmStatTotal" class="stat-value text-primary">-</div>
+        <div class="stat-desc">存储库中的密钥总数</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-success">
+          <i class="fas fa-hourglass-half text-2xl"></i>
+        </div>
+        <div class="stat-title">即将到期</div>
+        <div id="kdmStatExpiring" class="stat-value text-success">-</div>
+        <div class="stat-desc">未来 3 天内失效</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <i class="fas fa-cloud-arrow-down text-2xl"></i>
+        </div>
+        <div class="stat-title">可导入</div>
+        <div id="kdmStatImportable" class="stat-value text-warning">-</div>
+        <div class="stat-desc">可以直接导入密钥</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="kdm-list-head">
+        <div>
+          <h3 class="card-title text-xl">
+            <i class="fas fa-table-list"></i>
+            KDM
+          </h3>
+<!--          <p class="mt-1 text-sm text-base-content/65">找到密钥后可直接导入对应的 GDC，系统会先检查目标设备是否在线。</p>-->
+        </div>
+        <div class="tabs tabs-boxed kdm-tabs" role="tablist" aria-label="KDM 列表切换">
+          <button id="kdmAssetTab" type="button" class="tab tab-active" role="tab" aria-selected="true" aria-controls="kdmAssetPanel" data-kdm-tab="assets">
+            KDM 列表
+            <span id="kdmAssetTabCount" class="badge badge-sm">0</span>
+          </button>
+          <button id="kdmTaskTab" type="button" class="tab" role="tab" aria-selected="false" aria-controls="kdmTaskPanel" data-kdm-tab="tasks">
+            导入任务
+            <span id="kdmTaskTabCount" class="badge badge-sm">0</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="kdmAssetPanel" role="tabpanel" aria-labelledby="kdmAssetTab">
+        <div class="collapse collapse-arrow bg-base-100 border border-base-300 kdm-filter-panel">
+          <input type="checkbox" aria-label="展开筛选条件">
+          <div class="collapse-title kdm-filter-panel-title">
+            <div>
+              <span class="font-medium">筛选和排序</span>
+              <span id="kdmMobileFilterSummary" class="kdm-mobile-filter-summary">显示全部 KDM</span>
+            </div>
+          </div>
+          <div class="collapse-content">
+            <div class="kdm-filterbar">
+              <label class="kdm-filter-field kdm-filter-search">
+                <span>搜索</span>
+                <div class="input input-bordered input-sm flex items-center gap-2">
+                  <i class="fas fa-magnifying-glass text-base-content/45"></i>
+                  <input id="kdmFilterQuery" type="search" class="grow" placeholder="影片、影厅">
+                </div>
+              </label>
+              <label class="kdm-filter-field">
+                <span>状态</span>
+                <select id="kdmFilterStatus" class="select select-bordered select-sm">
+                  <option value="all">全部状态</option>
+                  <option value="importable">可导入</option>
+                  <option value="active-task">已有任务</option>
+                  <option value="unmatched">未匹配</option>
+                  <option value="offline">影厅离线</option>
+                  <option value="present">已在影厅内</option>
+                  <option value="unknown">无法确认</option>
+                  <option value="expired">已过期</option>
+                </select>
+              </label>
+              <label class="kdm-filter-field">
+                <span>影厅</span>
+                <select id="kdmFilterHall" class="select select-bordered select-sm">
+                  <option value="all">全部影厅</option>
+                </select>
+              </label>
+              <label class="kdm-filter-field">
+                <span>有效期</span>
+                <select id="kdmFilterValidity" class="select select-bordered select-sm">
+                  <option value="all">全部有效期</option>
+                  <option value="valid">当前有效</option>
+                  <option value="not-yet-valid">尚未生效</option>
+                  <option value="expired">已过期</option>
+                </select>
+              </label>
+              <label class="kdm-filter-field">
+                <span>排序</span>
+                <select id="kdmSortBy" class="select select-bordered select-sm">
+                  <option value="issueDate">签发时间</option>
+                  <option value="title">影片名称</option>
+                  <option value="hall">影厅</option>
+                  <option value="validBefore">生效时间</option>
+                  <option value="validAfter">失效时间</option>
+                  <option value="status">状态</option>
+                </select>
+              </label>
+              <button id="kdmSortDirection" type="button" class="btn btn-sm btn-ghost kdm-sort-direction" data-sort-dir="desc" title="切换排序方向" aria-label="切换排序方向">
+                <i class="fas fa-arrow-down-wide-short"></i>
+                降序
+              </button>
+              <button id="kdmFilterReset" type="button" class="btn btn-sm btn-ghost">
+                <i class="fas fa-filter-circle-xmark"></i>
+                重置
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="kdmFilterSummary" class="kdm-filter-summary">显示全部 KDM</div>
+
+        <div id="kdmBatchToolbar" class="kdm-batch-toolbar hidden">
+          <span id="kdmBatchCount" class="text-sm font-medium">已选 0 项</span>
+          <div class="flex gap-2">
+            <button id="kdmBatchImport" type="button" class="btn btn-sm btn-primary gap-1">
+              <i class="fas fa-download"></i>
+              批量导入
+            </button>
+            <button id="kdmBatchDelete" type="button" class="btn btn-sm btn-error gap-1">
+              <i class="fas fa-trash-can"></i>
+              批量删除
+            </button>
+            <button id="kdmBatchCancel" type="button" class="btn btn-sm btn-ghost gap-1">
+              取消选择
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="w-10"><input id="kdmSelectAll" type="checkbox" class="checkbox checkbox-sm"></th>
+                <th>影片</th>
+                <th>目标影厅</th>
+                <th>有效期</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="kdmTableBody">
+              <tr><td colspan="6" class="text-center text-base-content/60">正在加载 KDM 列表...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="kdmAssetPagination" class="kdm-pagination">
+          <span id="kdmAssetPageInfo" class="text-sm text-base-content/60">0-0 / 0</span>
+          <div class="kdm-pagination-controls">
+            <label class="kdm-page-size">
+              <span>每页</span>
+              <select id="kdmAssetPageSize" class="select select-bordered select-xs" aria-label="KDM 列表每页数量">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </label>
+            <button type="button" class="btn btn-sm btn-ghost" data-kdm-page-target="assets" data-kdm-page-action="prev">
+              <i class="fas fa-chevron-left"></i>
+              <span class="kdm-pagination-button-text">上一页</span>
+            </button>
+            <span id="kdmAssetPageNumber" class="kdm-page-number">1 / 1</span>
+            <button type="button" class="btn btn-sm btn-ghost" data-kdm-page-target="assets" data-kdm-page-action="next">
+              <span class="kdm-pagination-button-text">下一页</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="kdmTaskPanel" class="hidden" role="tabpanel" aria-labelledby="kdmTaskTab">
+        <div class="overflow-x-auto mt-4">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>影片</th>
+                <th>影厅</th>
+                <th>状态</th>
+                <th>进度</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="kdmTaskTableBody">
+              <tr><td colspan="6" class="text-center text-base-content/60">暂无 KDM 导入任务。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="kdmTaskPagination" class="kdm-pagination">
+          <span id="kdmTaskPageInfo" class="text-sm text-base-content/60">0-0 / 0</span>
+          <div class="kdm-pagination-controls">
+            <label class="kdm-page-size">
+              <span>每页</span>
+              <select id="kdmTaskPageSize" class="select select-bordered select-xs" aria-label="导入任务每页数量">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </label>
+            <button type="button" class="btn btn-sm btn-ghost" data-kdm-page-target="tasks" data-kdm-page-action="prev">
+              <i class="fas fa-chevron-left"></i>
+              <span class="kdm-pagination-button-text">上一页</span>
+            </button>
+            <span id="kdmTaskPageNumber" class="kdm-page-number">1 / 1</span>
+            <button type="button" class="btn btn-sm btn-ghost" data-kdm-page-target="tasks" data-kdm-page-action="next">
+              <span class="kdm-pagination-button-text">下一页</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

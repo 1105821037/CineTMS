@@ -1,0 +1,301 @@
+<div class="cinema-page-shell">
+  <section class="cinema-page-head">
+    <div>
+      <h2 class="cinema-page-title text-3xl font-bold">影厅管理</h2>
+      <p>播放控制与设备状态监控。</p>
+    </div>
+  </section>
+  <div id="cinemaControlPage" class="cinema-control-shell" data-bound="false">
+      <section class="card cinema-surface-card bg-base-100">
+        <div class="card-body gap-3 cinema-info-card-body">
+          <div id="cinemaEmptyState" class="alert alert-info hidden">
+            <i class="fas fa-circle-info"></i>
+            <span>请先从左侧选择一个影厅。</span>
+          </div>
+
+
+          <details id="cinemaHallInfo" class="collapse collapse-arrow cinema-info-panel">
+            <summary class="collapse-title cinema-info-summary">
+              <div class="cinema-info-title-group">
+                <h3 class="cinema-info-title" data-field="hall-name">-</h3>
+                <p class="cinema-info-subtitle hidden">ID: <span data-field="hall-id">-</span></p>
+              </div>
+              <div class="cinema-info-status-pills">
+                <span class="cinema-info-pill" data-field="gdc-state">-</span>
+                <span class="cinema-info-pill" data-field="projector-state">-</span>
+              </div>
+            </summary>
+            <div class="collapse-content cinema-info-detail-content">
+              <div class="cinema-info-detail-head">
+                <span>服务器详细信息</span>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-square cinema-info-refresh"
+                  data-refresh-runtime="1"
+                  title="刷新影厅信息"
+                  aria-label="刷新影厅信息"
+                >
+                  <i class="fas fa-rotate"></i>
+                </button>
+              </div>
+              <div class="cinema-info-grid">
+                <div class="cinema-info-item">
+                  <span class="cinema-info-item-label">服务器型号</span>
+                  <span class="cinema-info-item-value" data-field="server-model">-</span>
+                </div>
+                <div class="cinema-info-item">
+                  <span class="cinema-info-item-label">序列号</span>
+                  <span class="cinema-info-item-value" data-field="server-serial">-</span>
+                </div>
+                <div class="cinema-info-item">
+                  <span class="cinema-info-item-label">软件版本</span>
+                  <span class="cinema-info-item-value" data-field="software-version">-</span>
+                </div>
+                <div class="cinema-info-item">
+                  <span class="cinema-info-item-label">固件版本</span>
+                  <span class="cinema-info-item-value" data-field="firmware-version">-</span>
+                </div>
+                <div class="cinema-info-item">
+                  <span class="cinema-info-item-label">存储总容量</span>
+                  <span class="cinema-info-item-value" data-field="storage-total">-</span>
+                </div>
+                <div class="cinema-info-item">
+                  <span class="cinema-info-item-label">剩余容量</span>
+                  <span class="cinema-info-item-value" data-field="storage-free">-</span>
+                </div>
+                <div class="cinema-info-item cinema-info-item-wide">
+                  <span class="cinema-info-item-label">IP 列表</span>
+                  <span class="cinema-info-item-value cinema-info-item-break" data-field="server-ip-list">-</span>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <div class="cinema-command-layout">
+        <section class="card cinema-surface-card bg-base-100">
+          <div class="card-body gap-4">
+            <h3 class="card-title">
+              <i class="fas fa-sliders"></i>
+              播放控制
+            </h3>
+
+            <div id="cinemaControlError"></div>
+
+            <section id="cinemaScheduleStatusPanel" class="cinema-schedule-status hidden" aria-live="polite"></section>
+
+            <section class="card cinema-playback-card bg-base-100">
+              <div id="cinemaControlBusyMask" class="cinema-control-busy-mask hidden" aria-live="polite" aria-busy="true">
+                <span class="loading loading-spinner loading-md"></span>
+                <span data-role="control-busy-text">正在处理...</span>
+              </div>
+              <div class="card-body p-4 gap-4 cinema-player-shell">
+                <div class="cinema-status-row">
+                  <div class="cinema-status-stack">
+                    <h4 class="cinema-playback-state" data-field="playback-state">
+                      <i class="fas fa-stop-circle"></i>
+                      <span>停止</span>
+                    </h4>
+                    <div class="cinema-show-picker-row">
+                      <span class="cinema-show-picker-row-label">&#29616;&#34892;&#25773;&#25918;&#34920;</span>
+                      <details class="dropdown dropdown-bottom cinema-show-picker-dropdown">
+                        <summary class="cinema-show-picker-trigger">
+                          <span class="cinema-show-picker-title" data-field="loaded-show-title">&#24403;&#21069;&#26410;&#36733;&#20837;&#25918;&#26144;&#34920;</span>
+                          <i class="fas fa-chevron-down cinema-show-picker-arrow"></i>
+                        </summary>
+                        <div class="dropdown-content cinema-show-picker-panel z-20">
+                          <ul id="cinemaShowPickerList" class="menu menu-sm rounded-box bg-base-100 cinema-show-picker-list"></ul>
+                        </div>
+                      </details>
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm btn-square cinema-show-picker-refresh"
+                        data-refresh-shows="1"
+                        title="刷新放映表"
+                        aria-label="刷新放映表"
+                      >
+                        <i class="fas fa-rotate"></i>
+                      </button>
+                    </div>
+                    <div class="cinema-cpl-section-head">
+                      <span class="cinema-cpl-section-label">&#67;&#80;&#76;&#21015;&#34920;</span>
+                      <span class="badge badge-outline" data-field="current-cpl-badge">当前 CPL -/-</span>
+                    </div>
+                    <div id="cinemaLoadedCplList" class="cinema-cpl-list"></div>
+                    <p class="cinema-control-reason hidden" data-field="control-unavailable-reason">播放控制不可用</p>
+                  </div>
+                </div>
+
+                <div class="cinema-progress-wrap cinema-player-progress">
+                  <div id="cinemaSeekPreview" class="cinema-seek-preview hidden">目标 00:00:00</div>
+                  <input
+                    type="range"
+                    class="range range-primary"
+                    min="0"
+                    max="1"
+                    step="1"
+                    value="0"
+                    data-playback-slider
+                  >
+                  <div class="cinema-progress-head">
+                    <span data-field="played-timecode">00:00:00 / 00:00:00</span>
+                  </div>
+                </div>
+
+                <div class="cinema-player-primary-controls">
+                  <button type="button" class="btn btn-ghost btn-circle" data-cinema-action="previous-cpl" title="上一条 CPL">
+                    <i class="fas fa-backward-step"></i>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-circle" data-offset-seconds="-30" title="后退 30 秒">
+                    <i class="fas fa-rotate-left"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-circle btn-lg cinema-player-toggle"
+                    data-cinema-action="play"
+                    data-role="play-toggle"
+                    title="播放 / 暂停"
+                  >
+                    <i class="fas fa-play"></i>
+                    <span class="sr-only" data-play-toggle-label>开始播放</span>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-circle" data-cinema-action="stop" title="停止">
+                    <i class="fas fa-stop"></i>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-circle" data-offset-seconds="30" title="前进 30 秒">
+                    <i class="fas fa-rotate-right"></i>
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-circle" data-cinema-action="next-cpl" title="下一条 CPL">
+                    <i class="fas fa-forward-step"></i>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </section>
+
+        <section class="card cinema-surface-card bg-base-100">
+          <div class="card-body gap-4">
+            <div class="cinema-automation-head">
+              <div>
+                <h3 class="card-title">
+                  <i class="fas fa-bolt"></i>
+                  自动化指令
+                </h3>
+<!--                <p class="cinema-automation-caption">Automation</p>-->
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm btn-square"
+                data-refresh-automations="1"
+                title="刷新自动化指令"
+                aria-label="刷新自动化指令"
+              >
+                <i class="fas fa-rotate"></i>
+              </button>
+            </div>
+
+            <div class="cinema-automation-form">
+              <label class="form-control w-full">
+                <div class="label">
+                  <span class="label-text">Automation 指令</span>
+                </div>
+                <select id="cinemaAutomationSelect" class="select select-bordered w-full">
+                  <option value="">请选择自动化指令</option>
+                </select>
+              </label>
+              <button type="button" class="btn btn-primary" data-trigger-automation="1">
+                执行指令
+              </button>
+            </div>
+
+            <p class="cinema-automation-hint" data-field="automation-unavailable-reason">自动化指令不可用</p>
+          </div>
+        </section>
+      </div>
+
+      <dialog id="cinemaLoadDialog" class="modal">
+        <form method="dialog" class="modal-box cinema-dialog-box">
+          <h3 class="text-xl font-bold">载入放映表确认</h3>
+          <p class="mt-2 text-base font-medium" data-dialog="show-title">-</p>
+          <p class="cinema-dialog-helper">所有 CPL 校验通过时才允许载入。</p>
+          <div id="cinemaLoadDialogList" class="cinema-cpl-list mt-4"></div>
+          <div class="modal-action">
+            <button type="button" class="btn" data-dialog-close="1">取消</button>
+            <button type="button" class="btn btn-primary" data-dialog-confirm="load-show">确认载入</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="cinemaSeekDialog" class="modal">
+        <form method="dialog" class="modal-box cinema-dialog-box">
+          <h3 class="text-xl font-bold">定位播放进度</h3>
+          <p class="text-sm text-base-content/70 mt-2" data-dialog="seek-current-info">00:00:00 / 00:00:00</p>
+
+          <div class="cinema-seek-editor">
+            <label class="form-control w-full">
+              <div class="label">
+                <span class="label-text">目标时间</span>
+              </div>
+              <input
+                type="text"
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                placeholder="00:00:00"
+                value="00:00:00"
+                data-seek-input
+              >
+            </label>
+          </div>
+
+          <div class="cinema-seek-adjustments">
+            <button type="button" class="btn btn-sm btn-outline" data-seek-adjust="-300">-00:05:00</button>
+            <button type="button" class="btn btn-sm btn-outline" data-seek-adjust="-60">-00:01:00</button>
+            <button type="button" class="btn btn-sm btn-outline" data-seek-adjust="-10">-00:00:10</button>
+            <button type="button" class="btn btn-sm btn-outline" data-seek-adjust="10">+00:00:10</button>
+            <button type="button" class="btn btn-sm btn-outline" data-seek-adjust="60">+00:01:00</button>
+            <button type="button" class="btn btn-sm btn-outline" data-seek-adjust="300">+00:05:00</button>
+          </div>
+
+          <div class="modal-action">
+            <button type="button" class="btn" data-dialog-close="1">取消</button>
+            <button type="button" class="btn btn-primary" data-dialog-confirm="seek">确认定位</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="cinemaExitScheduleDialog" class="modal">
+        <form method="dialog" class="modal-box cinema-dialog-box">
+          <h3 class="text-xl font-bold">退出排程确认</h3>
+          <p class="mt-2 text-base font-medium" data-dialog="exit-schedule-title">-</p>
+          <p class="text-sm text-base-content/70 mt-1" data-dialog="exit-schedule-meta"></p>
+          <p class="cinema-dialog-helper">
+            退出后，排期引擎将停止监控当前排程，后续自动化动作不会继续执行；当前 GDC 播放不会被停止。
+          </p>
+          <div class="modal-action">
+            <button type="button" class="btn" data-dialog-close="1">取消</button>
+            <button type="button" class="btn btn-error" data-dialog-confirm="exit-schedule-monitoring">确认退出</button>
+          </div>
+        </form>
+      </dialog>
+  </div>
+
+  <template id="cinemaShowItemTemplate">
+    <li>
+      <button type="button" class="cinema-show-item" data-show-item="">
+        <span data-role="title">??????</span>
+      </button>
+    </li>
+  </template>
+
+  <template id="cinemaCplItemTemplate">
+    <div class="cinema-cpl-item rounded-box border border-base-300 bg-base-100 p-3">
+      <div class="cinema-cpl-item-head">
+        <strong class="block text-sm leading-snug" data-role="title">1. CPL</strong>
+        <i class="fas fa-circle-question opacity-70" data-role="status-icon" aria-hidden="true"></i>
+      </div>
+    </div>
+  </template>
+</div>

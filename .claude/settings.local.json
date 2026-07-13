@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(node *)",
+      "Bash(xxd)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\11058\\\\codexProjects\\\\TMS\" -Recurse -Force)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Format-Table FullName)",
+      "PowerShell(try { $r = Invoke-RestMethod -Uri \"http://localhost:4173/api/runtime/halls\" -Method Get -ErrorAction Stop; $r | ConvertTo-Json -Depth 5 } catch { Write-Output \"Server not reachable: $_\" })",
+      "PowerShell($session = New-Object Microsoft.PowerShell.Commands.WebRequestSession; $body = @{username=\"admin\"; password=\"admin\"} | ConvertTo-Json; try { $r = Invoke-RestMethod -Uri \"http://localhost:4173/api/auth/login\" -Method Post -Body $body -ContentType \"application/json\" -WebSession $session -ErrorAction Stop; Write-Output \"Login: $\\($r | ConvertTo-Json\\)\"; $halls = Invoke-RestMethod -Uri \"http://localhost:4173/api/runtime/halls\" -Method Get -WebSession $session -ErrorAction Stop; Write-Output \"Halls:\"; $halls | ConvertTo-Json -Depth 3 | Select-Object -First 100 } catch { Write-Output \"Error: $_\" })"
+    ]
+  }
+}

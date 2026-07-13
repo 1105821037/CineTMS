@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.idea/
+*.log
+web-server-*.log
+.tms/
+/storage/
+tms-*.tar
+debug_yolo_*.png
+*_failed_captcha_montage.png

@@ -1,0 +1,214 @@
+<div class="kdm-shell hall-kdm-shell" data-bound="false">
+  <section class="kdm-page-head">
+    <div>
+      <h2 class="kdm-page-title text-3xl font-bold">影厅 KDM 管理</h2>
+      <p class="mt-1 text-sm text-base-content/60">
+        <span data-hall-kdm-field="hall-name">当前影厅</span>
+        <span class="mx-1">/</span>
+        管理GDC设备内的密钥
+      </p>
+    </div>
+
+    <div class="kdm-page-actions flex flex-wrap items-center gap-3">
+      <button id="hallKdmRefresh" type="button" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-rotate"></i>
+        刷新
+      </button>
+      <button id="hallKdmRepositoryImport" type="button" class="btn btn-primary btn-sm gap-2">
+        <i class="fas fa-box-open"></i>
+        从存储库导入
+      </button>
+      <button id="hallKdmUploadTrigger" type="button" class="btn btn-secondary btn-sm gap-2">
+        <i class="fas fa-upload"></i>
+        本地上传
+      </button>
+      <button id="hallKdmTaskTrigger" type="button" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-list-check"></i>
+        导入任务
+      </button>
+    </div>
+  </section>
+
+  <input id="hallKdmUploadInput" type="file" class="hidden" accept=".xml,.zip" multiple>
+
+  <dialog id="hallKdmUploadModal" class="modal">
+    <div class="modal-box kdm-upload-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">本地上传并导入</h3>
+          <p id="hallKdmUploadSummary" class="mt-1 text-sm text-base-content/60">暂无待上传文件</p>
+        </div>
+        <button id="hallKdmUploadClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div id="hallKdmUploadList" class="kdm-upload-queue-list">
+        <div class="kdm-upload-queue-empty">请选择 XML KDM 文件或 ZIP 密钥包。</div>
+      </div>
+      <div class="modal-action kdm-upload-modal-actions">
+        <button id="hallKdmUploadAdd" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-plus"></i>
+          继续添加
+        </button>
+        <button id="hallKdmUploadClear" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-trash-can"></i>
+          清空
+        </button>
+        <div class="flex-1"></div>
+        <button id="hallKdmUploadCancel" type="button" class="btn btn-sm btn-ghost">取消</button>
+        <button id="hallKdmUploadConfirm" type="button" class="btn btn-sm btn-primary gap-2">
+          <i class="fas fa-cloud-arrow-up"></i>
+          上传并导入
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <dialog id="hallKdmRepositoryModal" class="modal">
+    <div class="modal-box kdm-upload-modal hall-kdm-wide-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">从存储库导入</h3>
+          <p id="hallKdmRepositorySummary" class="mt-1 text-sm text-base-content/60">选择要导入当前影厅的 KDM</p>
+        </div>
+        <button id="hallKdmRepositoryClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="w-10"><input id="hallKdmSelectAll" type="checkbox" class="checkbox checkbox-sm"></th>
+              <th>影片</th>
+              <th>有效期</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="hallKdmRepositoryTable">
+            <tr><td colspan="5" class="text-center text-base-content/60">正在加载存储库 KDM...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-action kdm-upload-modal-actions">
+        <span id="hallKdmRepositorySelection" class="text-sm text-base-content/60">已选 0 项</span>
+        <div class="flex-1"></div>
+        <button id="hallKdmRepositoryCancel" type="button" class="btn btn-sm btn-ghost">关闭</button>
+        <button id="hallKdmBatchImport" type="button" class="btn btn-sm btn-primary gap-2">
+          <i class="fas fa-download"></i>
+          导入已选
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <dialog id="hallKdmTaskModal" class="modal">
+    <div class="modal-box kdm-upload-modal hall-kdm-wide-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">导入任务</h3>
+          <p id="hallKdmTaskSummary" class="mt-1 text-sm text-base-content/60">当前影厅 KDM 摄取记录</p>
+        </div>
+        <button id="hallKdmTaskClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>影片</th>
+              <th>状态</th>
+              <th>进度</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="hallKdmTaskTable">
+            <tr><td colspan="5" class="text-center text-base-content/60">暂无 KDM 导入任务。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-action">
+        <button id="hallKdmTaskCancel" type="button" class="btn btn-sm btn-ghost">关闭</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+
+  <section id="hallKdmStatus" class="alert alert-info">
+    <i class="fas fa-circle-info"></i>
+    <span>正在加载影厅 KDM 信息...</span>
+  </section>
+
+  <section class="kdm-stats-grid">
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <i class="fas fa-key text-2xl"></i>
+        </div>
+        <div class="stat-title">设备内 KDM</div>
+        <div id="hallKdmDeviceCount" class="stat-value text-primary">-</div>
+        <div class="stat-desc">当前影厅已存在密钥</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-success">
+          <i class="fas fa-box-open text-2xl"></i>
+        </div>
+        <div class="stat-title">存储库可导入</div>
+        <div id="hallKdmImportableCount" class="stat-value text-success">-</div>
+        <div class="stat-desc">目标设备匹配当前影厅</div>
+      </div>
+    </div>
+
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <i class="fas fa-clock-rotate-left text-2xl"></i>
+        </div>
+        <div class="stat-title">导入任务</div>
+        <div id="hallKdmTaskCount" class="stat-value text-warning">-</div>
+        <div class="stat-desc">当前影厅 KDM 摄取记录</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-xl">
+    <div class="card-body gap-4">
+      <div class="kdm-list-head">
+        <div>
+          <h3 class="card-title text-xl">
+            <i class="fas fa-server"></i>
+            设备内 KDM
+          </h3>
+        </div>
+        <span id="hallKdmOnlineBadge" class="badge badge-ghost">未知</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>影片</th>
+              <th>有效期</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="hallKdmDeviceTable">
+            <tr><td colspan="4" class="text-center text-base-content/60">正在加载设备内 KDM...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

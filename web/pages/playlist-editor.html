@@ -1,0 +1,126 @@
+<div class="playlist-page-shell">
+  <section class="playlist-mobile-blocker" aria-live="polite">
+    <div class="playlist-mobile-blocker-icon">
+      <i class="fas fa-display"></i>
+    </div>
+    <h2>请在桌面端编辑放映表</h2>
+    <p>
+      放映表编辑需要拖拽时间轴、配置 CPL 与自动化命令。为了避免误操作，移动端暂不开放此页面编辑功能。
+    </p>
+  </section>
+
+  <section class="playlist-toolbar">
+    <div class="playlist-toolbar-main">
+      <span id="playlistHallName" class="playlist-hall-badge">当前影厅</span>
+      <label class="playlist-show-select-wrap">
+        <span>放映表</span>
+        <select id="playlistShowSelect" class="select select-bordered select-sm">
+          <option value="">请选择放映表</option>
+        </select>
+      </label>
+      <label class="playlist-title-wrap">
+        <span>名称</span>
+        <input
+          id="playlistTitleInput"
+          class="input input-bordered input-sm"
+          type="text"
+          pattern="[A-Za-z0-9 ,./\-_@#%]+"
+          placeholder="A Q C S 30m"
+          title="只能包含英文、数字、空格以及 ,./-_@#%"
+        >
+      </label>
+    </div>
+
+    <div class="playlist-toolbar-actions">
+      <button id="playlistNewButton" type="button" class="btn btn-sm btn-outline">
+        <i class="fas fa-plus"></i>
+        新建放映表
+      </button>
+      <button id="playlistCopyButton" type="button" class="btn btn-sm btn-outline">
+        <i class="fas fa-copy"></i>
+        复制放映表
+      </button>
+      <button id="playlistCopyToHallButton" type="button" class="btn btn-sm btn-outline">
+        <i class="fas fa-share-nodes"></i>
+        复制到其它影厅
+      </button>
+      <button id="playlistDeleteButton" type="button" class="btn btn-sm btn-outline btn-error">
+        <i class="fas fa-trash"></i>
+        删除放映表
+      </button>
+      <button id="playlistSaveButton" type="button" class="btn btn-sm btn-primary">
+        <i class="fas fa-floppy-disk"></i>
+        保存
+      </button>
+      <button id="playlistRefreshButton" type="button" class="btn btn-sm btn-ghost" title="刷新">
+        <i class="fas fa-rotate"></i>
+      </button>
+    </div>
+  </section>
+  <div id="playlistError"></div>
+
+  <section class="playlist-timeline-section">
+    <div class="playlist-section-head">
+      <div>
+        <h2>时间轴</h2>
+        <p id="playlistTimelineSummary">0 CPL · 00:00:00</p>
+      </div>
+      <button id="playlistValidateButton" type="button" class="btn btn-xs btn-outline" disabled>
+        <i class="fas fa-shield-check"></i>
+        校验
+      </button>
+    </div>
+    <div id="playlistTimeline" class="playlist-timeline" data-drop-zone="timeline"></div>
+  </section>
+
+  <div class="playlist-workspace">
+    <aside class="playlist-panel playlist-assets-panel">
+      <div class="playlist-panel-head">
+        <h3><i class="fas fa-film"></i> CPL</h3>
+        <span id="playlistCplCount" class="badge badge-outline">0</span>
+      </div>
+      <div id="playlistCplList" class="playlist-asset-list"></div>
+
+      <div class="playlist-panel-head playlist-command-head">
+        <h3><i class="fas fa-bolt"></i> 命令列表</h3>
+        <span id="playlistCommandCount" class="badge badge-outline">0</span>
+      </div>
+      <div id="playlistCommandList" class="playlist-asset-list playlist-command-list"></div>
+    </aside>
+
+    <main class="playlist-panel playlist-cpl-info-panel">
+      <div class="playlist-panel-head">
+        <h3><i class="fas fa-circle-info"></i> CPL 详细信息</h3>
+        <span id="playlistSelectedCplIndex" class="badge badge-outline">未选择</span>
+      </div>
+      <div id="playlistCplInfo" class="playlist-cpl-info"></div>
+    </main>
+  </div>
+
+  <input id="playlistIssuerInput" type="hidden" value="GDC">
+  <input id="playlistCreatorInput" type="hidden" value="SMS">
+  <input id="playlistPlayCountInput" type="hidden" value="1">
+
+  <dialog id="playlistCopyWizardDialog" class="modal">
+    <div class="modal-box playlist-copy-dialog">
+      <div class="playlist-copy-head">
+        <div>
+          <h3 class="font-bold text-lg">复制放映表到其它影厅</h3>
+          <p id="playlistCopyWizardSubtitle" class="playlist-copy-subtitle">选择放映表</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-ghost" data-copy-wizard-close="1" title="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="playlistCopyWizardBody" class="playlist-copy-body"></div>
+
+      <div class="modal-action playlist-copy-actions">
+        <button id="playlistCopyWizardBack" type="button" class="btn btn-sm btn-ghost">上一步</button>
+        <button id="playlistCopyWizardNext" type="button" class="btn btn-sm btn-primary">下一步</button>
+        <button id="playlistCopyWizardImport" type="button" class="btn btn-sm btn-primary">导入</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+</div>

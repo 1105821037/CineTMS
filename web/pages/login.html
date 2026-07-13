@@ -1,0 +1,48 @@
+<div class="login-page">
+  <main class="login-card" aria-label="登录 TMS">
+    <section class="login-visual" aria-hidden="true">
+      <div class="login-brand-mark">
+        <i class="fas fa-film"></i>
+      </div>
+      <div class="login-title-lockup">
+        <span>CineTMS</span>
+        <h1>影院放映管理系统</h1>
+      </div>
+    </section>
+
+    <section class="login-panel" aria-label="系统登录">
+      <div class="login-panel-head">
+        <span>系统登录</span>
+        <h2>欢迎回来</h2>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <label class="login-field">
+          <span>用户名</span>
+          <div class="login-input-wrap">
+            <i class="fas fa-user"></i>
+            <input id="loginUsername" class="input input-bordered w-full" autocomplete="username" required>
+          </div>
+        </label>
+
+        <label class="login-field">
+          <span>密码</span>
+          <div class="login-input-wrap">
+            <i class="fas fa-key"></i>
+            <input id="loginPassword" class="input input-bordered w-full" type="password" autocomplete="current-password" required>
+          </div>
+        </label>
+
+        <div id="loginError" class="alert alert-error hidden">
+          <i class="fas fa-circle-xmark"></i>
+          <span>登录失败。</span>
+        </div>
+
+        <button class="btn btn-primary w-full login-submit" type="submit">
+          <i class="fas fa-right-to-bracket"></i>
+          登录
+        </button>
+      </form>
+    </section>
+  </main>
+</div>

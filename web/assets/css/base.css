@@ -1,0 +1,33 @@
+﻿* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.nav-item.active {
+  background-color: color-mix(in oklch, var(--color-primary) 20%, transparent);
+}
+
+.content-fade-in {
+  animation: fadeIn .3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports (padding: max(0px)) {
+  .main-container {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}

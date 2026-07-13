@@ -1,0 +1,162 @@
+<div class="setup-page">
+  <div class="setup-shell setup-shell-narrow">
+    <div class="setup-hero">
+      <div class="setup-title">
+        <div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+          <i class="fas fa-film text-primary-content text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold">TMS 初始化设置向导</h1>
+          <p class="text-sm text-base-content/60">先完成数据库和管理员账号，售票系统、影厅和存储库可以进入系统后再配置。</p>
+        </div>
+      </div>
+      <ul class="steps steps-vertical lg:steps-horizontal w-full mt-8">
+        <li class="step step-primary" data-setup-step-indicator="0">数据库连接</li>
+        <li class="step" data-setup-step-indicator="1">管理员账号</li>
+        <li class="step" data-setup-step-indicator="2">完成</li>
+      </ul>
+    </div>
+
+    <div class="setup-card">
+      <form id="setupWizardForm">
+        <section class="setup-step" data-setup-step="0">
+          <div class="setup-step-head">
+            <div class="setup-step-icon"><i class="fas fa-database"></i></div>
+            <div>
+              <h3>配置 MySQL 数据库</h3>
+              <p>系统会先检查目标库状态：空库会自动初始化；已有非 TMS 数据库会被拒绝；已有 TMS 数据库需要验证管理员账号后继续使用。</p>
+            </div>
+          </div>
+
+          <div class="setup-form-grid">
+            <label class="setup-field">
+              <span>数据库主机</span>
+              <input id="mysqlHost" class="input input-bordered w-full" value="127.0.0.1" required>
+            </label>
+            <label class="setup-field">
+              <span>端口</span>
+              <input id="mysqlPort" class="input input-bordered w-full" value="3306" required>
+            </label>
+            <label class="setup-field">
+              <span>数据库名</span>
+              <input id="mysqlDatabase" class="input input-bordered w-full" value="tms" required>
+            </label>
+            <label class="setup-field">
+              <span>用户名</span>
+              <input id="mysqlUser" class="input input-bordered w-full" value="root" required>
+            </label>
+            <label class="setup-field setup-span-2">
+              <span>密码</span>
+              <input id="mysqlPassword" class="input input-bordered w-full" type="password" autocomplete="current-password">
+            </label>
+          </div>
+
+          <div class="setup-test-panel">
+            <button type="button" class="btn btn-primary" data-test-step="0">
+              <i class="fas fa-plug"></i>
+              检查并初始化数据库
+            </button>
+            <div class="setup-test-result" data-test-result="0">
+              <i class="fas fa-circle-info"></i>
+              下一步前需要先完成数据库检查。
+            </div>
+          </div>
+
+          <div id="existingTmsPanel" class="setup-info-card setup-risk-card hidden">
+            <div class="setup-info-title">
+              <i class="fas fa-shield-halved"></i>
+              <span>检测到已有 TMS 数据库</span>
+            </div>
+            <p class="setup-risk-copy">这通常用于迁移或恢复部署。请使用该数据库中已有管理员账号验证后继续，系统不会覆盖现有业务数据。</p>
+            <div id="existingTmsSummary" class="setup-info-grid"></div>
+            <div class="setup-form-grid mt-4">
+              <label class="setup-field">
+                <span>已有管理员账号</span>
+                <input id="existingAdminUsername" class="input input-bordered w-full" autocomplete="username">
+              </label>
+              <label class="setup-field">
+                <span>已有管理员密码</span>
+                <input id="existingAdminPassword" class="input input-bordered w-full" type="password" autocomplete="current-password">
+              </label>
+            </div>
+            <div class="setup-test-panel">
+              <button type="button" id="adoptDatabaseButton" class="btn btn-warning">
+                <i class="fas fa-key"></i>
+                验证并使用此数据库
+              </button>
+              <div id="adoptDatabaseResult" class="setup-test-result">
+                <i class="fas fa-circle-info"></i>
+                验证通过后会直接使用该 TMS 数据库。
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="setup-step hidden" data-setup-step="1">
+          <div class="setup-step-head">
+            <div class="setup-step-icon"><i class="fas fa-user-shield"></i></div>
+            <div>
+              <h3>创建管理员账号</h3>
+              <p>这个账号用于登录 TMS。后续可以在用户管理中继续维护其它账号。</p>
+            </div>
+          </div>
+
+          <div class="setup-form-grid">
+            <label class="setup-field setup-span-2">
+              <span>用户名</span>
+              <input id="accountUsername" class="input input-bordered w-full" value="admin" autocomplete="username" required>
+            </label>
+            <label class="setup-field">
+              <span>密码</span>
+              <input id="accountPassword" class="input input-bordered w-full" type="password" autocomplete="new-password" required>
+            </label>
+            <label class="setup-field">
+              <span>确认密码</span>
+              <input id="accountPasswordConfirm" class="input input-bordered w-full" type="password" autocomplete="new-password" required>
+            </label>
+          </div>
+
+          <div class="setup-test-panel">
+            <button type="button" class="btn btn-primary" data-test-step="1">
+              <i class="fas fa-floppy-disk"></i>
+              保存管理员账号
+            </button>
+            <div class="setup-test-result" data-test-result="1">
+              <i class="fas fa-circle-info"></i>
+              下一步前需要先保存管理员账号。
+            </div>
+          </div>
+        </section>
+
+        <section class="setup-step hidden" data-setup-step="2">
+          <div class="setup-step-head">
+            <div class="setup-step-icon"><i class="fas fa-circle-check"></i></div>
+            <div>
+              <h3>基础初始化已就绪</h3>
+              <p>现在可以进入系统。以下连接不再阻塞初始化，可以根据现场部署进度慢慢补充。</p>
+            </div>
+          </div>
+
+          <div class="setup-checklist">
+            <a href="#/settings-ticketing"><i class="fas fa-ticket"></i><span>售票系统连接</span></a>
+            <a href="#/settings-halls"><i class="fas fa-video"></i><span>影厅与 GDC 连接</span></a>
+            <a href="#/settings-storage"><i class="fas fa-folder-tree"></i><span>存储库与 FTP</span></a>
+            <a href="#/settings"><i class="fas fa-key"></i><span>中影华夏 KDM 账号</span></a>
+            <a href="#/settings-notifications"><i class="fas fa-bell"></i><span>外部通知</span></a>
+          </div>
+        </section>
+
+        <div class="setup-actions">
+          <button type="button" id="setupBack" class="btn btn-ghost">
+            <i class="fas fa-angle-left"></i>
+            上一步
+          </button>
+          <button type="button" id="setupNext" class="btn btn-primary" disabled>
+            下一步
+            <i class="fas fa-angle-right"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

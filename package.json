@@ -1,0 +1,24 @@
+{
+  "name": "tms",
+  "version": "beta1.2",
+  "private": true,
+  "description": "TMS cinema management system with GDC projector/server integration",
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{ recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "start:web": "node dist/server/web-server.js",
+    "start:gdc-smoke": "node dist/examples/gdc-smoke.js",
+    "start:finixx-smoke": "node dist/examples/finixx-smoke.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "basic-ftp": "^6.0.1",
+    "ftp-srv": "^4.6.3",
+    "iconv-lite": "^0.7.2",
+    "jszip": "^3.10.1",
+    "mysql2": "^3.22.2"
+  }
+}

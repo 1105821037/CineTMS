@@ -1,0 +1,55 @@
+<section id="externalNotificationSettingsRoot" class="view-stack">
+  <div class="section-head">
+    <div>
+      <h3>外部通知</h3>
+      <p>配置通知渠道与系统通知发送策略。</p>
+    </div>
+    <button id="externalNotificationSave" class="btn btn-primary" type="button">
+      <i class="fas fa-floppy-disk"></i>
+      保存设置
+    </button>
+  </div>
+
+  <div id="externalNotificationStatus" class="alert alert-error hidden">
+    <i class="fas fa-circle-xmark"></i>
+    <span></span>
+  </div>
+
+  <section class="panel external-notification-master">
+    <div>
+      <div class="font-bold">外部通知总开关</div>
+      <div class="text-sm text-base-content/60">关闭后不会向任何外部渠道发送通知。</div>
+    </div>
+    <input id="externalNotificationEnabled" type="checkbox" class="toggle toggle-primary">
+  </section>
+
+  <div class="external-notification-grid">
+    <section class="panel external-notification-panel">
+      <div class="external-notification-panel-head">
+        <div>
+          <h4>通知渠道</h4>
+          <p>ServerChan Turbo / v3</p>
+        </div>
+        <button id="addExternalNotificationChannel" class="btn btn-sm" type="button">
+          <i class="fas fa-plus"></i>
+          添加渠道
+        </button>
+      </div>
+      <div id="externalNotificationChannels" class="external-notification-list"></div>
+    </section>
+
+    <section class="panel external-notification-panel">
+      <div class="external-notification-panel-head">
+        <div>
+          <h4>通知策略</h4>
+          <p>按事件范围和最低级别发送到所选渠道</p>
+        </div>
+        <button id="addExternalNotificationPolicy" class="btn btn-sm" type="button">
+          <i class="fas fa-plus"></i>
+          添加策略
+        </button>
+      </div>
+      <div id="externalNotificationPolicies" class="external-notification-list"></div>
+    </section>
+  </div>
+</section>

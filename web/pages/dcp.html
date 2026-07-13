@@ -1,0 +1,247 @@
+<div class="kdm-shell dcp-shell">
+  <section class="kdm-page-head">
+    <div>
+      <h2 class="kdm-page-title text-3xl font-bold">DCP 影片管理</h2>
+      <p class="mt-1 text-sm text-base-content/60">存储在TMS上的影片包。</p>
+    </div>
+    <div class="kdm-page-actions flex flex-wrap items-center gap-3">
+      <button id="dcpRefreshButton" type="button" class="btn btn-ghost btn-sm gap-2">
+        <i class="fas fa-rotate"></i>
+        刷新
+      </button>
+      <button id="dcpUploadTrigger" type="button" class="btn btn-primary btn-sm gap-2">
+        <i class="fas fa-upload"></i>
+        上传 DCP
+      </button>
+    </div>
+  </section>
+
+  <input id="dcpUploadInput" type="file" class="hidden" webkitdirectory directory multiple>
+
+  <dialog id="dcpUploadModal" class="modal">
+    <div class="modal-box kdm-upload-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">影片包上传队列</h3>
+          <p id="dcpUploadSummary" class="mt-1 text-sm text-base-content/60">暂无待上传目录</p>
+        </div>
+        <button id="dcpUploadClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭上传队列">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div id="dcpUploadQueueList" class="kdm-upload-queue-list">
+        <div class="kdm-upload-queue-empty">选择一个影片包文件夹，或拖拽文件夹到页面。</div>
+      </div>
+      <div class="modal-action kdm-upload-modal-actions">
+        <button id="dcpUploadAdd" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-plus"></i>
+          继续添加
+        </button>
+        <button id="dcpUploadClear" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-trash-can"></i>
+          清空队列
+        </button>
+        <div class="flex-1"></div>
+        <button id="dcpUploadCancel" type="button" class="btn btn-sm btn-ghost">取消</button>
+        <button id="dcpUploadConfirm" type="button" class="btn btn-sm btn-primary gap-2">
+          <i class="fas fa-cloud-arrow-up"></i>
+          开始上传
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button id="dcpUploadBackdrop">close</button></form>
+  </dialog>
+
+  <dialog id="dcpImportModal" class="modal">
+    <div class="modal-box kdm-upload-modal dcp-import-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 class="text-lg font-bold">创建导入任务</h3>
+          <p id="dcpImportSummary" class="mt-1 text-sm text-base-content/60">请选择要导入的影片版本。</p>
+        </div>
+        <button id="dcpImportClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭导入影厅选择">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div class="dcp-import-grid">
+        <section>
+          <div class="dcp-import-section-title">影片版本</div>
+          <div id="dcpImportVersionList" class="kdm-upload-queue-list">
+            <div class="kdm-upload-queue-empty">暂无可导入版本。</div>
+          </div>
+        </section>
+        <section>
+          <div class="dcp-import-section-title">目标影厅</div>
+          <div id="dcpImportHallList" class="kdm-upload-queue-list">
+            <div class="kdm-upload-queue-empty">请选择影片版本。</div>
+          </div>
+        </section>
+      </div>
+      <div class="modal-action kdm-upload-modal-actions">
+        <button id="dcpImportRefresh" type="button" class="btn btn-sm btn-ghost gap-2">
+          <i class="fas fa-rotate"></i>
+          重新检测
+        </button>
+        <div class="flex-1"></div>
+        <button id="dcpImportCancel" type="button" class="btn btn-sm btn-ghost">取消</button>
+        <button id="dcpImportConfirm" type="button" class="btn btn-sm btn-primary gap-2" disabled>
+          <i class="fas fa-download"></i>
+          确认导入
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button id="dcpImportBackdrop">close</button></form>
+  </dialog>
+
+  <dialog id="dcpDetailModal" class="modal">
+    <div class="modal-box kdm-upload-modal dcp-detail-modal">
+      <div class="kdm-upload-modal-head">
+        <div>
+          <h3 id="dcpDetailTitle" class="text-lg font-bold">影片详情</h3>
+          <p id="dcpDetailSummary" class="mt-1 text-sm text-base-content/60">影片包信息与包内版本</p>
+        </div>
+        <button id="dcpDetailClose" type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="关闭影片详情">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div id="dcpDetailContent" class="dcp-detail-content">
+        <div class="kdm-upload-queue-empty">请选择影片包。</div>
+      </div>
+      <div class="modal-action">
+        <button id="dcpDetailDone" type="button" class="btn btn-sm btn-primary">关闭</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button id="dcpDetailBackdrop">close</button></form>
+  </dialog>
+
+  <section id="dcpUploadStatus" class="alert alert-info">
+    <i class="fas fa-circle-info"></i>
+    <span>请选择影片包根目录，目录内应包含 ASSETMAP、VOLINDEX、PKL/CPL XML 与 MXF 资源。</span>
+  </section>
+
+  <section class="kdm-stats-grid">
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-primary"><i class="fas fa-box-archive text-2xl"></i></div>
+        <div class="stat-title">影片包</div>
+        <div id="dcpStatPackages" class="stat-value text-primary">-</div>
+        <div class="stat-desc">存储库 / DCP</div>
+      </div>
+    </div>
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-success"><i class="fas fa-list-check text-2xl"></i></div>
+        <div class="stat-title">影片版本</div>
+        <div id="dcpStatCpls" class="stat-value text-success">-</div>
+        <div class="stat-desc">可选择导入的版本</div>
+      </div>
+    </div>
+    <div class="stats bg-base-100 shadow hover:shadow-lg transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning"><i class="fas fa-hard-drive text-2xl"></i></div>
+        <div class="stat-title">库内容量</div>
+        <div id="dcpStatSize" class="stat-value text-warning">-</div>
+        <div id="dcpStatSizeDesc" class="stat-desc">已用 / 总容量</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="kdm-list-head">
+        <div>
+          <h3 class="card-title text-xl">
+            <i class="fas fa-film"></i>
+            影片包
+          </h3>
+        </div>
+        <div class="tabs tabs-boxed kdm-tabs" role="tablist" aria-label="DCP 列表切换">
+          <button id="dcpAssetTab" type="button" class="tab tab-active" role="tab" aria-selected="true" data-dcp-tab="assets">
+            影片
+            <span id="dcpAssetTabCount" class="badge badge-sm">0</span>
+          </button>
+          <button id="dcpTaskTab" type="button" class="tab" role="tab" aria-selected="false" data-dcp-tab="tasks">
+            导入任务
+            <span id="dcpTaskTabCount" class="badge badge-sm">0</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="collapse collapse-arrow bg-base-100 border border-base-300 kdm-filter-panel dcp-filter-panel">
+        <input type="checkbox" aria-label="展开筛选条件">
+        <div class="collapse-title kdm-filter-panel-title">
+          <div>
+            <span class="font-medium">筛选和导入</span>
+            <span id="dcpMobileFilterSummary" class="kdm-mobile-filter-summary">显示全部影片包</span>
+          </div>
+        </div>
+        <div class="collapse-content">
+          <div class="kdm-filterbar dcp-filterbar">
+            <label class="kdm-filter-field kdm-filter-search">
+              <span>搜索</span>
+              <div class="input input-bordered input-sm flex items-center gap-2">
+                <i class="fas fa-magnifying-glass text-base-content/45"></i>
+                <input id="dcpFilterQuery" type="search" class="grow" placeholder="影片名称、版本、影片包">
+              </div>
+            </label>
+            <label class="kdm-filter-field">
+              <span>状态</span>
+              <select id="dcpFilterStatus" class="select select-bordered select-sm">
+                <option value="all">全部状态</option>
+                <option value="ok">可导入</option>
+                <option value="warning">有警告</option>
+                <option value="error">异常</option>
+              </select>
+            </label>
+            <button id="dcpBatchImport" type="button" class="btn btn-sm btn-primary gap-2">
+              <i class="fas fa-download"></i>
+              导入
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="dcpFilterSummary" class="kdm-filter-summary">显示全部影片包</div>
+
+      <div id="dcpAssetPanel" role="tabpanel" aria-labelledby="dcpAssetTab">
+        <div class="overflow-x-auto mt-4">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>影片包</th>
+                <th>版本</th>
+                <th>信息</th>
+                <th>大小</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="dcpCplTableBody">
+              <tr><td colspan="6" class="text-center text-base-content/60">正在加载影片包...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="dcpTaskPanel" class="hidden" role="tabpanel" aria-labelledby="dcpTaskTab">
+        <div class="overflow-x-auto mt-4">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>内容</th>
+                <th>影厅</th>
+                <th>状态</th>
+                <th>进度</th>
+                <th>任务号</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="dcpTaskTableBody">
+              <tr><td colspan="7" class="text-center text-base-content/60">暂无影片版本导入任务。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

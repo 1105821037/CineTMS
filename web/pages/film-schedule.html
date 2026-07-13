@@ -1,0 +1,214 @@
+<div class="film-schedule-shell" id="filmScheduleRoot">
+  <div class="film-schedule-head">
+    <div>
+      <h2 class="text-2xl font-bold">影片排期</h2>
+      <p class="text-sm text-base-content/60 mt-1">CineTMS内置排期引擎，由TMS监管影厅状态，注意：非GDC服务器排期器。</p>
+    </div>
+    <div class="film-schedule-actions">
+      <button id="filmScheduleRefreshBtn" class="btn btn-ghost btn-sm">
+        <i class="fas fa-rotate"></i>
+        刷新
+      </button>
+      <label class="film-schedule-date-field">
+        <span>排期日期</span>
+        <input id="filmScheduleDateInput" type="date" class="input input-bordered input-sm">
+      </label>
+    </div>
+  </div>
+
+  <div id="filmScheduleError" class="alert alert-error hidden">
+    <i class="fas fa-circle-exclamation"></i>
+    <span></span>
+  </div>
+
+  <section class="panel film-schedule-panel">
+    <div class="film-schedule-panel-head">
+      <div>
+        <h3>售票系统排期</h3>
+        <p id="filmScheduleTicketingMeta">--</p>
+      </div>
+      <span id="filmScheduleTicketingStatus" class="badge badge-ghost badge-sm">待加载</span>
+    </div>
+    <div id="filmScheduleTicketingTimeline" class="film-schedule-timeline-wrap"></div>
+  </section>
+
+  <section class="panel film-schedule-panel">
+    <div class="film-schedule-panel-head">
+      <div>
+        <h3>排期预览</h3>
+        <p id="filmSchedulePreviewMeta">--</p>
+      </div>
+      <button id="filmScheduleCustomBtn" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i>
+        添加自定义排期
+      </button>
+    </div>
+    <div id="filmSchedulePreviewTimeline" class="film-schedule-timeline-wrap"></div>
+  </section>
+
+  <dialog id="filmScheduleCustomDialog" class="modal">
+    <div class="modal-box film-schedule-dialog">
+      <div class="film-schedule-dialog-head">
+        <div>
+          <h3 id="filmScheduleCustomTitle" class="font-bold text-lg">自定义排期</h3>
+          <p id="filmScheduleCustomSubtitle">选择影片放映模板和开始时间</p>
+        </div>
+        <button id="filmScheduleCustomCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmScheduleCustomForm" class="film-schedule-form">
+        <div id="filmScheduleCustomSessionSummary" class="film-schedule-custom-session hidden"></div>
+        <label class="form-control film-schedule-wide">
+          <span class="label-text">影片放映模板</span>
+          <select id="filmScheduleRuleSelect" class="select select-bordered select-sm" required></select>
+        </label>
+        <div class="film-schedule-form-grid">
+          <label class="form-control">
+            <span class="label-text">影厅</span>
+            <select id="filmScheduleRuleHallSelect" class="select select-bordered select-sm" required></select>
+          </label>
+          <label class="form-control">
+            <span class="label-text">开始时间</span>
+            <input id="filmScheduleCustomStartInput" type="datetime-local" step="1" class="input input-bordered input-sm" required>
+          </label>
+        </div>
+        <div id="filmScheduleCustomHallWarning" class="film-schedule-notice is-warning hidden">
+          <i class="fas fa-triangle-exclamation"></i>
+          <span></span>
+        </div>
+        <div class="film-schedule-estimate">
+          <span>预计时长</span>
+          <strong id="filmScheduleCustomEstimate">--</strong>
+        </div>
+        <div id="filmScheduleCustomRulePreview"></div>
+        <label class="form-control film-schedule-wide">
+          <span class="label-text">备注</span>
+          <input id="filmScheduleCustomNotesInput" type="text" class="input input-bordered input-sm" maxlength="500">
+        </label>
+        <div id="filmScheduleCustomError" class="text-error text-xs hidden"></div>
+        <label class="film-schedule-check-row">
+          <input id="filmScheduleCustomAlignFeatureInput" type="checkbox" class="checkbox checkbox-sm" checked>
+          <span>
+            <strong>对齐正片时间</strong>
+            <small id="filmScheduleCustomAlignFeatureText">启用后，会提前放映贴片广告，使正片能对齐到开场时间</small>
+          </span>
+        </label>
+        <div class="modal-action">
+          <button id="filmScheduleCustomCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+          <button id="filmScheduleCustomSaveBtn" type="submit" class="btn btn-primary btn-sm">保存排期</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="filmScheduleManagedDialog" class="modal">
+    <div class="modal-box film-schedule-managed-dialog">
+      <div class="film-schedule-dialog-head">
+        <div>
+          <h3 class="font-bold text-lg">开启自动托管</h3>
+          <p><span id="filmScheduleManagedHallName">--</span> · 自动同步售票系统有人场次</p>
+        </div>
+        <button id="filmScheduleManagedCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmScheduleManagedForm" class="film-schedule-form">
+        <div class="film-schedule-notice is-muted">
+          <i class="fas fa-robot"></i>
+          <span>开启托管后，将自动添加已售票的场次（已添加过的场次如果变为空场则会被移除）。</span>
+        </div>
+        <label class="film-schedule-check-row">
+          <input id="filmScheduleManagedAlignFeatureInput" type="checkbox" class="checkbox checkbox-sm" checked>
+          <span>
+            <strong>对齐正片时间</strong>
+            <small>启用后，会提前放映贴片广告，使正片能对齐到开场时间</small>
+          </span>
+        </label>
+        <div class="film-schedule-check-row film-schedule-managed-auto-disable-row">
+          <input id="filmScheduleManagedAutoDisableEnabledInput" type="checkbox" class="checkbox checkbox-sm" checked>
+          <div class="film-schedule-managed-auto-disable-body">
+            <label for="filmScheduleManagedAutoDisableEnabledInput" class="film-schedule-managed-auto-disable-label">
+              <strong>托管时限</strong>
+            </label>
+            <small>启用后会在指定时间关闭托管</small>
+            <label class="film-schedule-managed-auto-disable-time">
+              <span class="label-text">关闭时间</span>
+              <input id="filmScheduleManagedAutoDisableInput" type="datetime-local" class="input input-bordered input-sm">
+            </label>
+          </div>
+        </div>
+        <div id="filmScheduleManagedError" class="text-error text-xs hidden"></div>
+        <div class="modal-action">
+          <button id="filmScheduleManagedCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+          <button id="filmScheduleManagedSaveBtn" type="submit" class="btn btn-primary btn-sm">开启托管</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="filmScheduleEditDialog" class="modal">
+    <div class="modal-box film-schedule-dialog">
+      <div class="film-schedule-dialog-head">
+        <div>
+          <h3 class="font-bold text-lg">调整排期</h3>
+          <p id="filmScheduleEditSubtitle"></p>
+        </div>
+        <button id="filmScheduleEditCloseBtn" type="button" class="btn btn-ghost btn-sm btn-circle" aria-label="关闭">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <form id="filmScheduleEditForm" class="film-schedule-form">
+        <label class="form-control film-schedule-wide">
+          <span class="label-text">影片放映模板</span>
+          <select id="filmScheduleEditRuleSelect" class="select select-bordered select-sm" required></select>
+        </label>
+        <div class="film-schedule-form-grid">
+          <label class="form-control">
+            <span class="label-text">影厅</span>
+            <select id="filmScheduleEditHallSelect" class="select select-bordered select-sm" required></select>
+          </label>
+          <label class="form-control">
+            <span class="label-text">开始时间</span>
+            <input id="filmScheduleEditStartInput" type="datetime-local" step="1" class="input input-bordered input-sm" required>
+          </label>
+        </div>
+        <div id="filmScheduleEditHallWarning" class="film-schedule-notice is-warning hidden">
+          <i class="fas fa-triangle-exclamation"></i>
+          <span></span>
+        </div>
+        <div class="film-schedule-estimate">
+          <span>预计时长</span>
+          <strong id="filmScheduleEditEstimate">--</strong>
+        </div>
+        <div id="filmScheduleEditRulePreview"></div>
+        <label class="form-control film-schedule-wide">
+          <span class="label-text">备注</span>
+          <input id="filmScheduleEditNotesInput" type="text" class="input input-bordered input-sm" maxlength="500">
+        </label>
+        <div id="filmScheduleEditError" class="text-error text-xs hidden"></div>
+        <div id="filmScheduleDeleteMonitorWarning" class="film-schedule-delete-monitor-warning hidden">
+          <div class="film-schedule-notice is-danger">
+            <i class="fas fa-triangle-exclamation"></i>
+            <span>
+              删除排期会退出当前排程的播放监控，后续自动化动作将不会执行；当前播放仍会继续。
+            </span>
+          </div>
+          <p id="filmScheduleDeleteMonitorMeta"></p>
+          <div class="film-schedule-delete-monitor-actions">
+            <button id="filmScheduleDeleteMonitorCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+            <button id="filmScheduleDeleteMonitorConfirmBtn" type="button" class="btn btn-error btn-sm">
+              确认删除并退出监控
+            </button>
+          </div>
+        </div>
+        <div class="modal-action film-schedule-edit-actions">
+          <button id="filmScheduleDeleteBtn" type="button" class="btn btn-ghost btn-sm text-error">删除</button>
+          <span class="film-schedule-action-spacer"></span>
+          <button id="filmScheduleEditCancelBtn" type="button" class="btn btn-ghost btn-sm">取消</button>
+          <button id="filmScheduleEditSaveBtn" type="submit" class="btn btn-primary btn-sm">保存调整</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+</div>

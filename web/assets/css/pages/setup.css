@@ -1,0 +1,482 @@
+﻿.setup-page {
+  min-height: 100vh;
+  background: var(--color-base-200);
+  padding: 1rem;
+}
+
+.setup-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.setup-shell-narrow {
+  width: min(920px, 100%);
+}
+
+.setup-hero,
+.setup-card {
+  border-radius: var(--radius-box, .5rem);
+  background: var(--color-base-100);
+  box-shadow: 0 1px 3px rgb(0 0 0 / .08), 0 10px 24px rgb(0 0 0 / .04);
+}
+
+.setup-hero {
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.setup-title {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.setup-card {
+  padding: 1.25rem;
+}
+
+.setup-step {
+  min-height: 24rem;
+}
+
+.setup-step-icon {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: .5rem;
+  background: color-mix(in oklch, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+}
+
+.setup-step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+  margin-bottom: 1.25rem;
+}
+
+.setup-step-head h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.setup-step-head p {
+  margin-top: .25rem;
+  color: color-mix(in oklch, var(--color-base-content) 62%, transparent);
+  font-size: .875rem;
+  line-height: 1.55;
+}
+
+.setup-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.setup-field {
+  display: grid;
+  gap: .4rem;
+  min-width: 0;
+}
+
+.setup-field span {
+  color: color-mix(in oklch, var(--color-base-content) 78%, transparent);
+  font-size: .875rem;
+  font-weight: 700;
+}
+
+.setup-span-2 {
+  grid-column: span 2;
+}
+
+.setup-test-panel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-base-300);
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.setup-test-result {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: color-mix(in oklch, var(--color-base-content) 65%, transparent);
+  font-size: .875rem;
+}
+
+.setup-test-result.success {
+  color: var(--color-success);
+}
+
+.setup-test-result.error {
+  color: var(--color-error);
+}
+
+.setup-info-card {
+  border: 1px solid color-mix(in oklch, var(--color-success) 35%, transparent);
+  border-radius: var(--radius-box, .5rem);
+  background: color-mix(in oklch, var(--color-success) 8%, transparent);
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.setup-risk-card {
+  border-color: color-mix(in oklch, var(--color-warning) 45%, transparent);
+  background: color-mix(in oklch, var(--color-warning) 10%, var(--color-base-100));
+}
+
+.setup-risk-card .setup-info-title {
+  color: var(--color-warning);
+}
+
+.setup-risk-copy {
+  margin-top: .6rem;
+  color: color-mix(in oklch, var(--color-base-content) 68%, transparent);
+  font-size: .875rem;
+  line-height: 1.55;
+}
+
+.setup-info-title {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--color-success);
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.setup-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem 1rem;
+  margin-top: .85rem;
+}
+
+.setup-info-grid div {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.setup-info-grid span {
+  color: color-mix(in oklch, var(--color-base-content) 58%, transparent);
+  font-size: .75rem;
+}
+
+.setup-info-grid strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .95rem;
+}
+
+.setup-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--color-base-300);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.setup-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.setup-checklist a {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  min-width: 0;
+  border: 1px solid var(--color-base-300);
+  border-radius: .75rem;
+  background: var(--color-base-100);
+  padding: .9rem 1rem;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+.setup-checklist a:hover {
+  border-color: color-mix(in oklch, var(--color-primary) 40%, var(--color-base-300));
+  background: color-mix(in oklch, var(--color-primary) 6%, var(--color-base-100));
+}
+
+.setup-checklist i {
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: .5rem;
+  background: color-mix(in oklch, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+}
+
+.setup-checklist span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.hall-setup-card {
+  border: 1px solid var(--color-base-300);
+  border-radius: var(--radius-box, .5rem);
+  padding: 1rem;
+  background: var(--color-base-100);
+}
+
+.hall-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.hall-list-wrap {
+  overflow: visible;
+}
+
+.hall-list-head,
+.hall-setup-row {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1.2fr) minmax(12rem, 1fr) 7rem 7rem 8rem;
+  gap: .75rem;
+  align-items: center;
+  min-width: 760px;
+}
+
+.hall-list-head {
+  display: none;
+}
+
+.hall-card {
+  border: 1px solid color-mix(in oklch, var(--color-base-300) 92%, transparent);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--color-base-100) 96%, transparent), var(--color-base-100));
+  box-shadow: 0 10px 30px rgb(0 0 0 / .08);
+  padding: 1rem;
+}
+
+.hall-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: .85rem;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-base-300) 88%, transparent);
+}
+
+.hall-card-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding-top: .95rem;
+}
+
+.hall-connection-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem;
+  gap: .85rem;
+}
+
+.hall-port-field {
+  max-width: 8rem;
+}
+
+.hall-name-cell {
+  min-width: 0;
+}
+
+.hall-name-cell h4 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.hall-name-cell p {
+  margin-top: .25rem;
+  color: color-mix(in oklch, var(--color-base-content) 55%, transparent);
+  font-size: .82rem;
+}
+
+.hall-panel {
+  min-width: 0;
+  border: 1px solid color-mix(in oklch, var(--color-base-300) 90%, transparent);
+  border-radius: .9rem;
+  background: color-mix(in oklch, var(--color-base-100) 94%, transparent);
+  padding: .95rem 1rem;
+}
+
+.hall-config-panel {
+  display: grid;
+  align-content: start;
+}
+
+.hall-status-panel {
+  background: color-mix(in oklch, var(--color-success) 4%, var(--color-base-100));
+  border-color: color-mix(in oklch, var(--color-success) 14%, var(--color-base-300));
+}
+
+.hall-panel-title {
+  color: color-mix(in oklch, var(--color-base-content) 58%, transparent);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.hall-panel-hint {
+  margin-top: .35rem;
+  color: color-mix(in oklch, var(--color-base-content) 62%, transparent);
+  font-size: .8rem;
+  line-height: 1.55;
+}
+
+.hall-test-result-summary {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .96rem;
+  font-weight: 800;
+}
+
+.setup-test-result[data-hall-result] {
+  display: block;
+  margin-top: .85rem;
+}
+
+.hall-device-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem .85rem;
+  margin-top: .7rem;
+  padding-top: .7rem;
+  border-top: 1px dashed color-mix(in oklch, var(--color-success) 30%, transparent);
+}
+
+.hall-device-info div {
+  display: grid;
+  gap: .1rem;
+  padding: .55rem .65rem;
+  border-radius: .75rem;
+  background: color-mix(in oklch, var(--color-base-100) 92%, transparent);
+}
+
+.hall-device-info span {
+  color: color-mix(in oklch, var(--color-base-content) 58%, transparent);
+  font-size: .72rem;
+}
+
+.hall-device-info strong {
+  overflow-wrap: anywhere;
+  font-size: .84rem;
+}
+
+.hall-device-info .is-serial strong {
+  color: var(--color-success);
+  font-size: 1.28rem;
+  line-height: 1.15;
+}
+
+.hall-device-info .is-serial {
+  grid-column: 1 / -1;
+  border: 1px solid color-mix(in oklch, var(--color-success) 30%, transparent);
+  background: color-mix(in oklch, var(--color-success) 10%, transparent);
+}
+
+.hall-actions-cell {
+  display: flex;
+  justify-content: flex-end;
+  gap: .45rem;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .setup-shell {
+    padding: 1rem 0;
+  }
+
+  .setup-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .setup-actions > div {
+    justify-content: stretch;
+  }
+
+  .setup-actions .btn {
+    flex: 1;
+  }
+
+  .setup-title {
+    align-items: flex-start;
+  }
+
+  .setup-step-head {
+    flex-wrap: wrap;
+  }
+
+  .setup-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-span-2 {
+    grid-column: auto;
+  }
+
+  .setup-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .hall-card {
+    padding: .9rem;
+  }
+
+  .hall-card-top {
+    flex-direction: column;
+  }
+
+  .hall-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .hall-connection-form {
+    grid-template-columns: 1fr;
+  }
+
+  .hall-port-field {
+    max-width: none;
+  }
+
+  .hall-actions-cell {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .hall-actions-cell .btn:first-child {
+    flex: 1;
+  }
+
+  .hall-device-info {
+    grid-template-columns: 1fr;
+  }
+
+}

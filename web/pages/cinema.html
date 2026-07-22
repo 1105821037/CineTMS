@@ -129,15 +129,18 @@
 
                 <div class="cinema-progress-wrap cinema-player-progress">
                   <div id="cinemaSeekPreview" class="cinema-seek-preview hidden">目标 00:00:00</div>
-                  <input
-                    type="range"
-                    class="range range-primary"
-                    min="0"
-                    max="1"
-                    step="1"
-                    value="0"
-                    data-playback-slider
-                  >
+                  <div class="cinema-progress-rail">
+                    <input
+                      type="range"
+                      class="range range-primary"
+                      min="0"
+                      max="1"
+                      step="1"
+                      value="0"
+                      data-playback-slider
+                    >
+                    <div id="cinemaProgressMarkers" class="cinema-progress-markers" aria-label="当前 CPL 时间点标记"></div>
+                  </div>
                   <div class="cinema-progress-head">
                     <span data-field="played-timecode">00:00:00 / 00:00:00</span>
                   </div>
@@ -176,8 +179,24 @@
           </div>
         </section>
 
-        <section class="card cinema-surface-card bg-base-100">
-          <div class="card-body gap-4">
+        <div class="cinema-command-sidebar">
+          <section class="card cinema-surface-card bg-base-100 cinema-timepoint-card">
+            <div class="card-body gap-3">
+              <div class="cinema-timepoint-head">
+                <div>
+                  <h3 class="card-title">
+                    <i class="fas fa-location-dot"></i>
+                    时间点信息
+                  </h3>
+                  <p id="cinemaTimepointSummary" class="cinema-timepoint-summary">当前没有可用时间点</p>
+                </div>
+              </div>
+              <div id="cinemaTimepointList" class="cinema-timepoint-list" aria-live="polite"></div>
+            </div>
+          </section>
+
+          <section class="card cinema-surface-card bg-base-100">
+            <div class="card-body gap-4">
             <div class="cinema-automation-head">
               <div>
                 <h3 class="card-title">
@@ -212,8 +231,9 @@
             </div>
 
             <p class="cinema-automation-hint" data-field="automation-unavailable-reason">自动化指令不可用</p>
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
       </div>
 
       <dialog id="cinemaLoadDialog" class="modal">

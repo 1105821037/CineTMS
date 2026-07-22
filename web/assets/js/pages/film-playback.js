@@ -890,7 +890,7 @@ async function loadPlaylistDetailsWithSnapshot(refs) {
         if (isSnapshotDriftError(error)) {
           throw error;
         }
-        warnings.push(`${getHallName(ref.hallId)} 当前无法读取播放表，已使用上次保存的快照。`);
+        warnings.push(`${getHallName(ref.hallId)} 当前无法读取播放表，下列播放表信息来自于上次保存的快照。`);
         details.push({ ...snapshotDetail, hallId: ref.hallId, snapshotSource: true });
         continue;
       }

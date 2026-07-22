@@ -362,8 +362,9 @@ function renderExternalNotificationEventTree(policy) {
 function renderExternalNotificationEventNode(node, selectedKeys, depth) {
   const hasChildren = Array.isArray(node.children) && node.children.length > 0;
   const checked = isExternalNotificationEventNodeChecked(node, selectedKeys);
+  const depthClass = `is-depth-${Math.min(Math.max(Number(depth) || 0, 0), 2)}`;
   return `
-    <div class="external-notification-event-node" style="--event-depth: ${depth}">
+    <div class="external-notification-event-node ${depthClass}">
       <label>
         <input type="checkbox" class="checkbox checkbox-xs" data-policy-event="${escapeHtml(node.key)}" ${checked ? "checked" : ""}>
         <span>${escapeHtml(node.label)}</span>
@@ -741,7 +742,7 @@ function renderMiscSettings() {
     if (item.type === "toggle") {
       return `
         <div class="misc-settings-item">
-          <div>
+          <div class="misc-settings-copy">
             <div class="item-label">${escapeHtml(item.label)}</div>
             <div class="item-desc">${escapeHtml(item.desc)}</div>
           </div>
@@ -751,15 +752,15 @@ function renderMiscSettings() {
     }
     return "";
   }).join("") + `
-    <form id="zyhxKdmAccountForm" class="misc-settings-item">
-      <div>
+    <form id="zyhxKdmAccountForm" class="misc-settings-item misc-settings-account">
+      <div class="misc-settings-copy">
         <div class="item-label">中影华夏密钥账户</div>
         <div class="item-desc">用于在 KDM 管理页拉取、搜索和下载中影华夏密钥包。（测试功能）</div>
       </div>
-      <div class="grid gap-2 min-w-[20rem]">
+      <div class="misc-settings-account-fields">
         <input id="zyhxKdmUsername" class="input input-bordered input-sm" autocomplete="off" placeholder="账号">
         <input id="zyhxKdmPassword" class="input input-bordered input-sm" type="password" autocomplete="new-password" placeholder="密码">
-        <div class="flex items-center justify-end gap-2">
+        <div class="misc-settings-account-actions">
           <span id="zyhxKdmAccountStatus" class="text-xs text-base-content/55">未配置</span>
           <button id="zyhxKdmAccountSave" type="submit" class="btn btn-primary btn-sm">
             <i class="fas fa-floppy-disk"></i>

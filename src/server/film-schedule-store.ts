@@ -221,6 +221,35 @@ export async function updateFilmScheduleEntry(
   }
 }
 
+export async function updateFilmScheduleEntryRuleSnapshot(
+  id: string,
+  ruleSnapshot: unknown,
+): Promise<FilmScheduleEntry> {
+  const normalizedId = id.trim();
+  if (!normalizedId) {
+    throw new ApiError(400, "缺少排期 ID。");
+  }
+
+  const connection = await openFilmScheduleConnection();
+  try {
+    const [result] = await connection.execute<mysql.ResultSetHeader>(
+      "UPDATE tms_film_schedule_entries SET rule_snapshot = CAST(? AS JSON) WHERE id = ?",
+      [JSON.stringify(ruleSnapshot ?? null), normalizedId],
+    );
+    if (result.affectedRows === 0) {
+      throw new ApiError(404, "未找到指定排期。");
+    }
+
+    const updated = await readEntryById(connection, normalizedId);
+    if (!updated) {
+      throw new ApiError(404, "未找到指定排期。");
+    }
+    return updated;
+  } finally {
+    await connection.end();
+  }
+}
+
 export async function deleteFilmScheduleEntry(id: string): Promise<FilmScheduleEntry> {
   const normalizedId = id.trim();
   if (!normalizedId) {

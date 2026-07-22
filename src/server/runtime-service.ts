@@ -68,6 +68,7 @@ export interface RuntimeShowCplRecord {
   readonly screenAspectRatio?: string;
   readonly aspectRatioLabel?: string;
   readonly formatTags?: readonly string[];
+  readonly commands?: readonly GdcShowPlaylistCommand[];
   readonly validation: GdcValidateCplResult;
 }
 
@@ -626,8 +627,10 @@ export class TmsRuntimeService {
     this.assertHallDeviceReachable(hallId, "无法读取 CPL 列表");
     const client = this.resolveClient(hallId);
     const detail = await this.getShowDetail(client, showUuid);
+    const segments = this.normalizeShowSegments(detail);
     const cpls = await Promise.all(
-      detail.cplUuids.map(async (cplUuid, index) => {
+      segments.map(async (segment, index) => {
+        const cplUuid = segment.cplUuid;
         const [cplDetail, validation] = await Promise.all([
           client.getCpl(cplUuid).catch(() => ({ cplUuid, rawCplXml: "" } as GdcCplDetail)),
           client.validateCpl(cplUuid),
@@ -649,6 +652,7 @@ export class TmsRuntimeService {
           screenAspectRatio: cplDetail.screenAspectRatio,
           aspectRatioLabel: cplDetail.aspectRatioLabel,
           formatTags: cplDetail.formatTags,
+          commands: segment.commands ?? [],
           validation,
         };
       }),

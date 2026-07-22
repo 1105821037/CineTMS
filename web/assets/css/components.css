@@ -212,6 +212,15 @@
   background: var(--color-base-100);
 }
 
+.misc-settings-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.misc-settings-item > .toggle {
+  flex: 0 0 auto;
+}
+
 .misc-settings-item .item-label {
   font-weight: 600;
   font-size: .925rem;
@@ -222,6 +231,43 @@
   color: color-mix(in oklch, var(--color-base-content) 58%, transparent);
   font-size: .8rem;
   line-height: 1.5;
+}
+
+.misc-settings-account-fields {
+  display: grid;
+  flex: 0 1 20rem;
+  gap: .5rem;
+  min-width: 16rem;
+}
+
+.misc-settings-account-fields .input {
+  width: 100%;
+  min-width: 0;
+}
+
+.misc-settings-account-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .5rem;
+}
+
+@media (max-width: 640px) {
+  .misc-settings-item {
+    gap: .75rem;
+    padding: .875rem 1rem;
+  }
+
+  .misc-settings-account {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .misc-settings-account-fields {
+    flex-basis: auto;
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 .external-notification-master {
@@ -377,7 +423,15 @@
 }
 
 .external-notification-event-node {
-  padding-left: calc(var(--event-depth, 0) * 1.15rem);
+  padding-left: 0;
+}
+
+.external-notification-event-node.is-depth-1 {
+  padding-left: 1.15rem;
+}
+
+.external-notification-event-node.is-depth-2 {
+  padding-left: 2.3rem;
 }
 
 .external-notification-event-node label {

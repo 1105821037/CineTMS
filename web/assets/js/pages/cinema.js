@@ -36,6 +36,7 @@ const cinemaState = {
   isSeeking: false,
   controlPanelBusy: false,
   controlPanelBusyText: "正在处理...",
+  selectedTimepointId: "",
 };
 
 const cinemaDom = {
@@ -52,6 +53,9 @@ const cinemaDom = {
   loadedCplList: null,
   automationSelect: null,
   playbackSlider: null,
+  progressMarkers: null,
+  timepointList: null,
+  timepointSummary: null,
   seekPreview: null,
   loadDialog: null,
   loadDialogList: null,
@@ -107,6 +111,7 @@ export function disposeCinemaPage() {
   cinemaState.isSeeking = false;
   cinemaState.controlPanelBusy = false;
   cinemaState.controlPanelBusyText = "正在处理...";
+  cinemaState.selectedTimepointId = "";
   cinemaState.scheduleStatus = createEmptyScheduleStatus();
   stopInterpolationTicker();
   stopScheduleStatusPolling();
@@ -131,6 +136,7 @@ async function loadSelectedHall() {
   cinemaState.pendingExitScheduleRuntime = null;
   cinemaState.playbackUiOverride = null;
   cinemaState.scheduleMonitorExitBusy = false;
+  cinemaState.selectedTimepointId = "";
   cinemaState.scheduleStatus = createEmptyScheduleStatus();
   syncSelectedShow();
 }
@@ -149,6 +155,9 @@ function cacheCinemaDom() {
   cinemaDom.loadedCplList = document.getElementById("cinemaLoadedCplList");
   cinemaDom.automationSelect = document.getElementById("cinemaAutomationSelect");
   cinemaDom.playbackSlider = document.querySelector("[data-playback-slider]");
+  cinemaDom.progressMarkers = document.getElementById("cinemaProgressMarkers");
+  cinemaDom.timepointList = document.getElementById("cinemaTimepointList");
+  cinemaDom.timepointSummary = document.getElementById("cinemaTimepointSummary");
   cinemaDom.seekPreview = document.getElementById("cinemaSeekPreview");
   cinemaDom.loadDialog = document.getElementById("cinemaLoadDialog");
   cinemaDom.loadDialogList = document.getElementById("cinemaLoadDialogList");
@@ -205,9 +214,19 @@ function bindCinemaEvents() {
 
   root.addEventListener("click", async (event) => {
     const target = event.target.closest(
-      "[data-refresh-runtime], [data-refresh-shows], [data-refresh-automations], [data-trigger-automation], [data-show-item], [data-cinema-action], [data-offset-seconds], [data-exit-schedule-monitoring], [data-dialog-close], [data-dialog-confirm], [data-seek-adjust]",
+      "[data-refresh-runtime], [data-refresh-shows], [data-refresh-automations], [data-trigger-automation], [data-show-item], [data-cinema-action], [data-offset-seconds], [data-exit-schedule-monitoring], [data-dialog-close], [data-dialog-confirm], [data-seek-adjust], [data-timepoint-select], [data-timepoint-jump]",
     );
     if (!target) {
+      return;
+    }
+
+    if (target.dataset.timepointJump) {
+      openTimepointSeekDialog(target.dataset.timepointJump, target.dataset.timepointEdge || "start");
+      return;
+    }
+
+    if (target.dataset.timepointSelect) {
+      selectTimepoint(target.dataset.timepointSelect);
       return;
     }
 
@@ -528,12 +547,16 @@ async function hydrateLoadedShowInspection(force = false) {
     cinemaState.loadedShowInspection = null;
     renderLoadedCplList();
     renderPlaybackInfo();
+    renderTimepointNavigation();
     return;
   }
 
   const loadedShowUuid = getLoadedShowUuid();
   if (!loadedShowUuid) {
     cinemaState.loadedShowInspection = null;
+    renderLoadedCplList();
+    renderPlaybackInfo();
+    renderTimepointNavigation();
     return;
   }
 
@@ -541,9 +564,14 @@ async function hydrateLoadedShowInspection(force = false) {
     return;
   }
 
+  if (cinemaState.loadedShowInspection?.showUuid !== loadedShowUuid) {
+    cinemaState.loadedShowInspection = null;
+    renderTimepointNavigation();
+  }
   cinemaState.loadedShowInspection = await loadShowInspection(cinemaState.selectedHallId, loadedShowUuid).catch(() => null);
   renderLoadedCplList();
   renderPlaybackInfo();
+  renderTimepointNavigation();
 }
 
 async function hydrateCinemaSecondaryData(hallId) {
@@ -637,6 +665,7 @@ async function loadScheduleStatus() {
       loadedAt: Date.now(),
     };
     renderScheduleStatusPanel();
+    renderTimepointNavigation();
   } catch (error) {
     console.warn("Failed to load film scheduler status:", error);
   }
@@ -1182,6 +1211,7 @@ function renderAll() {
   renderHallInfo();
   renderScheduleStatusPanel();
   renderPlaybackInfo();
+  renderTimepointNavigation();
   renderAutomationPanel();
   renderControlBusyState();
   renderLoadedCplList();
@@ -1363,6 +1393,438 @@ function getScheduleRuntimeSortTime(runtime, entry) {
 
 function getScheduleEntry(scheduleId) {
   return cinemaState.scheduleStatus.entries.find((entry) => entry.id === scheduleId) || null;
+}
+
+function renderTimepointNavigation() {
+  renderProgressMarkers();
+  renderTimepointPanel();
+}
+
+function renderTimepointPanel() {
+  if (!cinemaDom.timepointList) {
+    return;
+  }
+
+  const items = getTimepointItems();
+  if (cinemaState.selectedTimepointId && !items.some((item) => item.id === cinemaState.selectedTimepointId)) {
+    cinemaState.selectedTimepointId = "";
+  }
+
+  const currentCplIndex = getCurrentCplIndex();
+  const currentCplCount = items.filter((item) => isTimepointInCpl(item, currentCplIndex)).length;
+  const scheduleCount = items.filter((item) => item.source === "schedule").length;
+  const playlistCount = items.filter((item) => item.source === "playlist").length;
+  const mismatch = hasScheduleShowMismatch();
+  if (cinemaDom.timepointSummary) {
+    cinemaDom.timepointSummary.textContent = mismatch
+      ? `放映模板播放表与当前播放表不一致；共 ${items.length} 个时间点，时间点不可定位`
+      : `影片放映模板 ${scheduleCount} 个 · 播放表 ${playlistCount} 个 · 当前 CPL ${currentCplCount} 个`;
+  }
+
+  if (items.length === 0) {
+    const message = getLoadedShowUuid()
+      ? "当前筛选条件下没有时间点。"
+      : "载入播放表后显示命令标记；进入活动排期后显示模板时间点。";
+    cinemaDom.timepointList.innerHTML = `<div class="cinema-timepoint-empty">${escapeHtml(message)}</div>`;
+    return;
+  }
+
+  const currentPlayed = getInterpolatedPlayedSeconds();
+  const previousScrollTop = cinemaDom.timepointList.scrollTop;
+  cinemaDom.timepointList.innerHTML = items.map((item) => {
+    const startTarget = getTimepointTarget(item, "start");
+    const endTarget = getTimepointTarget(item, "end");
+    const canJumpStart = canJumpToTimepointTarget(startTarget, currentCplIndex);
+    const canJumpEnd = item.type === "range" && canJumpToTimepointTarget(endTarget, currentCplIndex);
+    const isPast = Number.isInteger(endTarget.cplIndex)
+      && (endTarget.cplIndex < currentCplIndex
+        || (endTarget.cplIndex === currentCplIndex && endTarget.localSeconds < currentPlayed));
+    const selected = item.id === cinemaState.selectedTimepointId;
+    const sourceIcon = item.type === "range" ? "fa-arrows-left-right" : item.source === "schedule" ? "fa-calendar-day" : "fa-bolt";
+    const rangeClass = item.type === "range" ? " is-range" : "";
+    const actions = item.type === "range"
+      ? `
+        <div class="cinema-timepoint-actions">
+          ${renderTimepointJumpButton(item, "start", canJumpStart, currentCplIndex, "定位开始")}
+          ${renderTimepointJumpButton(item, "end", canJumpEnd, currentCplIndex, "定位结束")}
+        </div>
+      `
+      : renderTimepointJumpButton(item, "start", canJumpStart, currentCplIndex, "定位");
+    return `
+      <div
+        class="cinema-timepoint-item is-${escapeAttr(item.source)}${rangeClass}${selected ? " is-selected" : ""}${isPast ? " is-past" : ""}"
+      >
+        <button
+          type="button"
+          class="cinema-timepoint-select-button"
+          data-timepoint-select="${escapeAttr(item.id)}"
+          aria-pressed="${selected}"
+        >
+          <span class="cinema-timepoint-source-icon"><i class="fas ${sourceIcon}"></i></span>
+          <span class="cinema-timepoint-copy">
+            <span class="cinema-timepoint-title">${item.type === "range" ? '<span class="cinema-timepoint-type-badge">时间段</span>' : ""}${escapeHtml(item.label)}</span>
+            <span class="cinema-timepoint-meta">${escapeHtml(formatTimepointMeta(item))}</span>
+          </span>
+        </button>
+        ${actions}
+      </div>
+    `;
+  }).join("");
+  cinemaDom.timepointList.scrollTop = previousScrollTop;
+}
+
+function renderTimepointJumpButton(item, edge, canJump, currentCplIndex, label) {
+  const target = getTimepointTarget(item, edge);
+  const jumpReason = getTimepointJumpUnavailableReason(target, currentCplIndex);
+  return `
+    <button
+      type="button"
+      class="btn btn-xs ${canJump ? "btn-primary" : "btn-ghost"} cinema-timepoint-action"
+      data-timepoint-jump="${escapeAttr(item.id)}"
+      data-timepoint-edge="${escapeAttr(edge)}"
+      title="${escapeAttr(canJump ? `${label}：${formatSeconds(target.localSeconds)}` : jumpReason)}"
+      ${canJump ? "" : "disabled"}
+    >${escapeHtml(label)}</button>
+  `;
+}
+
+function renderProgressMarkers() {
+  if (!cinemaDom.progressMarkers) {
+    return;
+  }
+
+  const currentCplIndex = getCurrentCplIndex();
+  const total = getPlayedTotal();
+  if (currentCplIndex < 0 || total <= 0) {
+    cinemaDom.progressMarkers.replaceChildren();
+    return;
+  }
+
+  const items = getTimepointItems();
+  const currentBoundary = getCplBoundaries()[currentCplIndex];
+  const rangeBands = items.flatMap((item) => {
+    if (item.type !== "range" || item.mappingUnavailable || !currentBoundary
+      || !Number.isFinite(currentBoundary.start) || !Number.isFinite(currentBoundary.end)
+      || !Number.isFinite(item.showSeconds) || !Number.isFinite(item.endSeconds)) {
+      return [];
+    }
+    const overlapStart = Math.max(item.showSeconds, currentBoundary.start);
+    const overlapEnd = Math.min(item.endSeconds, currentBoundary.end);
+    if (overlapEnd <= overlapStart) {
+      return [];
+    }
+    const localStart = clampSeconds(overlapStart - currentBoundary.start, 0, total);
+    const localEnd = clampSeconds(overlapEnd - currentBoundary.start, 0, total);
+    const left = clampSeconds((localStart / total) * 100, 0, 100);
+    const width = clampSeconds(((localEnd - localStart) / total) * 100, 0, 100 - left);
+    const selected = item.id === cinemaState.selectedTimepointId;
+    const title = `${item.label} · 当前 CPL ${formatSeconds(localStart)}–${formatSeconds(localEnd)}`;
+    return [`
+      <button
+        type="button"
+        class="cinema-progress-range${selected ? " is-selected" : ""}"
+        style="left:${left.toFixed(3)}%;width:${width.toFixed(3)}%"
+        data-timepoint-select="${escapeAttr(item.id)}"
+        title="${escapeAttr(title)}"
+        aria-label="${escapeAttr(title)}"
+      ></button>
+    `];
+  }).join("");
+
+  const groups = new Map();
+  for (const item of items) {
+    if (item.type === "range") {
+      continue;
+    }
+    if (item.cplIndex !== currentCplIndex || !Number.isFinite(item.localSeconds)) {
+      continue;
+    }
+    const localSeconds = clampSeconds(item.localSeconds, 0, total);
+    const key = String(Math.round(localSeconds));
+    const group = groups.get(key) || { localSeconds, items: [] };
+    group.items.push(item);
+    groups.set(key, group);
+  }
+
+  const pointMarkers = [...groups.values()].map((group) => {
+    const sources = new Set(group.items.map((item) => item.source));
+    const sourceClass = sources.size > 1 ? "mixed" : group.items[0].source;
+    const selected = group.items.some((item) => item.id === cinemaState.selectedTimepointId);
+    const labels = group.items.map((item) => item.label).join("、");
+    const title = `${formatSeconds(group.localSeconds)} · ${labels}`;
+    const left = clampSeconds((group.localSeconds / total) * 100, 0, 100);
+    return `
+      <button
+        type="button"
+        class="cinema-progress-marker is-${sourceClass}${group.items.length > 1 ? " is-cluster" : ""}${selected ? " is-selected" : ""}"
+        style="left:${left.toFixed(3)}%"
+        data-timepoint-select="${escapeAttr(group.items[0].id)}"
+        title="${escapeAttr(title)}"
+        aria-label="${escapeAttr(title)}"
+      ></button>
+    `;
+  }).join("");
+  cinemaDom.progressMarkers.innerHTML = rangeBands + pointMarkers;
+}
+
+function selectTimepoint(id) {
+  cinemaState.selectedTimepointId = id;
+  renderTimepointNavigation();
+  const selected = [...(cinemaDom.timepointList?.querySelectorAll("[data-timepoint-select]") || [])]
+    .find((node) => node.dataset.timepointSelect === id);
+  selected?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+}
+
+function openTimepointSeekDialog(id, edge = "start") {
+  const item = getTimepointItems().find((candidate) => candidate.id === id);
+  const currentCplIndex = getCurrentCplIndex();
+  const target = item ? getTimepointTarget(item, edge) : null;
+  if (!item || !target || target.cplIndex !== currentCplIndex || !Number.isFinite(target.localSeconds)) {
+    const positionLabel = item?.type === "range" ? `该时间段的${edge === "end" ? "结束" : "开始"}位置` : "该时间点";
+    renderCinemaError(`${positionLabel}不属于当前 CPL，不能执行定位。`);
+    renderTimepointNavigation();
+    return;
+  }
+  if (!canOperatePlayback()) {
+    renderCinemaError(getControlUnavailableReason() || "当前播放状态不可定位。");
+    return;
+  }
+
+  cinemaState.selectedTimepointId = id;
+  cinemaState.pendingSeekTarget = clampSeconds(target.localSeconds, 0, getPlayedTotal());
+  openSeekDialog();
+  renderTimepointNavigation();
+}
+
+function getTimepointItems() {
+  const boundaries = getCplBoundaries();
+  const items = [];
+  const active = getActiveScheduleRuntime();
+  const entry = active ? getScheduleEntry(active.scheduleId) : null;
+  const scheduleMismatch = hasScheduleShowMismatch();
+  const rule = entry?.ruleSnapshot && typeof entry.ruleSnapshot === "object" ? entry.ruleSnapshot : null;
+  const schedulePoints = Array.isArray(rule?.timePoints) ? rule.timePoints : [];
+
+  schedulePoints.forEach((point, index) => {
+    const showSeconds = Number(point?.startSeconds);
+    if (!Number.isFinite(showSeconds) || showSeconds < 0) {
+      return;
+    }
+    const mapped = scheduleMismatch ? null : mapShowSecondsToCpl(showSeconds, boundaries);
+    const type = ["head", "tail", "range"].includes(point?.type) ? point.type : "point";
+    const endSeconds = type === "range" && Number.isFinite(Number(point?.endSeconds)) ? Number(point.endSeconds) : null;
+    const endMapped = !scheduleMismatch && Number.isFinite(endSeconds)
+      ? mapShowSecondsToCpl(endSeconds, boundaries)
+      : null;
+    items.push({
+      id: `schedule:${point?.id || index}`,
+      source: "schedule",
+      type,
+      label: String(point?.note || getSchedulePointTypeLabel(type)),
+      showSeconds,
+      endSeconds,
+      cplIndex: mapped?.cplIndex ?? null,
+      localSeconds: mapped?.localSeconds ?? null,
+      endCplIndex: endMapped?.cplIndex ?? null,
+      endLocalSeconds: endMapped?.localSeconds ?? null,
+      startMappingUnavailable: scheduleMismatch || !mapped,
+      endMappingUnavailable: scheduleMismatch || (type === "range" && !endMapped),
+      mappingUnavailable: scheduleMismatch || !mapped || (type === "range" && !endMapped),
+    });
+  });
+
+  for (const boundary of boundaries) {
+    const commands = Array.isArray(boundary.cpl?.commands) ? boundary.cpl.commands : [];
+    commands.forEach((command, commandIndex) => {
+      const fps = parseEditRateFps(command?.editRate || boundary.cpl?.editRate);
+      const frames = Number(command?.offsetFrames);
+      const rawSeconds = Number.isFinite(frames) ? Math.max(frames, 0) / fps : 0;
+      const localSeconds = Number.isFinite(boundary.duration)
+        ? clampSeconds(rawSeconds, 0, boundary.duration)
+        : rawSeconds;
+      items.push({
+        id: `playlist:${boundary.index}:${command?.markerUuid || commandIndex}`,
+        source: "playlist",
+        type: "command",
+        label: String(command?.annotationText || command?.label || `命令 ${commandIndex + 1}`),
+        showSeconds: Number.isFinite(boundary.start) ? boundary.start + localSeconds : null,
+        endSeconds: null,
+        cplIndex: boundary.index,
+        localSeconds,
+        endCplIndex: null,
+        endLocalSeconds: null,
+        startMappingUnavailable: false,
+        endMappingUnavailable: false,
+        mappingUnavailable: false,
+      });
+    });
+  }
+
+  return items.sort(compareTimepoints);
+}
+
+function getCplBoundaries() {
+  const cpls = Array.isArray(cinemaState.loadedShowInspection?.cpls) ? cinemaState.loadedShowInspection.cpls : [];
+  let start = 0;
+  let timelineKnown = true;
+  return cpls.map((cpl, index) => {
+    const duration = getCplDuration(cpl);
+    const boundary = {
+      index,
+      cpl,
+      start: timelineKnown ? start : null,
+      duration,
+      end: timelineKnown && Number.isFinite(duration) ? start + duration : null,
+    };
+    if (timelineKnown && Number.isFinite(duration)) {
+      start += duration;
+    } else {
+      timelineKnown = false;
+    }
+    return boundary;
+  });
+}
+
+function getCplDuration(cpl) {
+  const durationSeconds = Number(cpl?.durationSeconds);
+  if (Number.isFinite(durationSeconds) && durationSeconds >= 0) {
+    return durationSeconds;
+  }
+  const durationFrames = Number(cpl?.durationFrames);
+  if (Number.isFinite(durationFrames) && durationFrames >= 0) {
+    return durationFrames / parseEditRateFps(cpl?.editRate);
+  }
+  return null;
+}
+
+function mapShowSecondsToCpl(showSeconds, boundaries) {
+  for (let index = 0; index < boundaries.length; index += 1) {
+    const boundary = boundaries[index];
+    if (!Number.isFinite(boundary.start) || !Number.isFinite(boundary.end)) {
+      continue;
+    }
+    const isLast = index === boundaries.length - 1;
+    if (showSeconds < boundary.end || (isLast && showSeconds <= boundary.end)) {
+      return {
+        cplIndex: boundary.index,
+        localSeconds: clampSeconds(showSeconds - boundary.start, 0, boundary.duration),
+      };
+    }
+  }
+  return null;
+}
+
+function hasScheduleShowMismatch() {
+  const active = getActiveScheduleRuntime();
+  if (!active) {
+    return false;
+  }
+  const entry = getScheduleEntry(active.scheduleId);
+  const expected = active.activeShowUuid || getRuleShowUuidForHall(entry?.ruleSnapshot, cinemaState.selectedHallId);
+  const loaded = getLoadedShowUuid();
+  return Boolean(expected && loaded && normalizeUuid(expected) !== normalizeUuid(loaded));
+}
+
+function getRuleShowUuidForHall(rule, hallId) {
+  if (!rule || typeof rule !== "object" || !Array.isArray(rule.playlistRefs)) {
+    return "";
+  }
+  return rule.playlistRefs.find((ref) => String(ref?.hallId || "") === String(hallId || ""))?.playlistId || "";
+}
+
+function normalizeUuid(value) {
+  return String(value || "").trim().replace(/^urn:uuid:/i, "").toLowerCase();
+}
+
+function parseEditRateFps(editRate) {
+  const parts = String(editRate || "").trim().split(/\s+/).map((part) => Number(part));
+  const numerator = parts[0];
+  const denominator = parts[1] || 1;
+  return Number.isFinite(numerator) && numerator > 0 && Number.isFinite(denominator) && denominator > 0
+    ? numerator / denominator
+    : DEFAULT_FPS;
+}
+
+function compareTimepoints(left, right) {
+  const leftKey = Number.isFinite(left.showSeconds)
+    ? left.showSeconds
+    : (Number.isInteger(left.cplIndex) ? (left.cplIndex * 1_000_000) + (left.localSeconds || 0) : Number.MAX_SAFE_INTEGER);
+  const rightKey = Number.isFinite(right.showSeconds)
+    ? right.showSeconds
+    : (Number.isInteger(right.cplIndex) ? (right.cplIndex * 1_000_000) + (right.localSeconds || 0) : Number.MAX_SAFE_INTEGER);
+  return leftKey - rightKey || left.source.localeCompare(right.source);
+}
+
+function formatTimepointMeta(item) {
+  if (item.type === "range") {
+    if (!Number.isInteger(item.cplIndex) || !Number.isFinite(item.localSeconds)
+      || !Number.isInteger(item.endCplIndex) || !Number.isFinite(item.endLocalSeconds)) {
+      return "放映模板时间段 · 无法映射到当前播放表";
+    }
+    if (item.cplIndex === item.endCplIndex) {
+      return `放映模板时间段 · CPL ${item.cplIndex + 1} 内 ${formatSeconds(item.localSeconds)}–${formatSeconds(item.endLocalSeconds)}`;
+    }
+    return `放映模板时间段 · 开始 CPL ${item.cplIndex + 1} ${formatSeconds(item.localSeconds)} · 结束 CPL ${item.endCplIndex + 1} ${formatSeconds(item.endLocalSeconds)}`;
+  }
+  if (item.source === "schedule") {
+    const mapped = Number.isInteger(item.cplIndex) && Number.isFinite(item.localSeconds)
+      ? `CPL ${item.cplIndex + 1} 内 ${formatSeconds(item.localSeconds)}`
+      : "无法映射到当前播放表";
+    return `放映模板 · ${mapped}`;
+  }
+  return `播放表命令 · CPL ${item.cplIndex + 1} 内 ${formatSeconds(item.localSeconds)}`;
+}
+
+function getSchedulePointTypeLabel(type) {
+  if (type === "head") return "片头时间点";
+  if (type === "tail") return "片尾时间点";
+  if (type === "range") return "放映时间段";
+  return "放映时间点";
+}
+
+function getTimepointTarget(item, edge = "start") {
+  if (item?.type === "range" && edge === "end") {
+    return {
+      cplIndex: item.endCplIndex,
+      localSeconds: item.endLocalSeconds,
+      mappingUnavailable: item.endMappingUnavailable,
+    };
+  }
+  return {
+    cplIndex: item?.cplIndex,
+    localSeconds: item?.localSeconds,
+    mappingUnavailable: item?.startMappingUnavailable ?? item?.mappingUnavailable,
+  };
+}
+
+function canJumpToTimepointTarget(target, currentCplIndex) {
+  return !target.mappingUnavailable
+    && target.cplIndex === currentCplIndex
+    && Number.isFinite(target.localSeconds)
+    && canOperatePlayback();
+}
+
+function isTimepointInCpl(item, cplIndex) {
+  if (cplIndex < 0) {
+    return false;
+  }
+  if (item.type !== "range") {
+    return item.cplIndex === cplIndex;
+  }
+  return Number.isInteger(item.cplIndex) && Number.isInteger(item.endCplIndex)
+    && cplIndex >= item.cplIndex && cplIndex <= item.endCplIndex;
+}
+
+function getTimepointJumpUnavailableReason(target, currentCplIndex) {
+  if (target.mappingUnavailable || !Number.isInteger(target.cplIndex)) {
+    return "无法将整场时间换算到当前播放表的 CPL。";
+  }
+  if (target.cplIndex !== currentCplIndex) {
+    return currentCplIndex >= 0
+      ? `该位置属于 CPL ${target.cplIndex + 1}，当前正在播放 CPL ${currentCplIndex + 1}。`
+      : "当前 CPL 尚未确定。";
+  }
+  return getControlUnavailableReason() || "当前播放状态不可定位。";
 }
 
 function getScheduleActions(scheduleId) {

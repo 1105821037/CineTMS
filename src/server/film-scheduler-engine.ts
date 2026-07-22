@@ -2,7 +2,11 @@ import { setTimeout as delay } from "node:timers/promises";
 import type { GdcPlaybackStatus } from "../modules/gdc";
 import type { HallRuntimeRecord } from "../runtime";
 import { ApiError } from "./http";
-import { listFilmScheduleEntries, updateFilmScheduleEntry, type FilmScheduleEntry } from "./film-schedule-store";
+import {
+  listFilmScheduleEntries,
+  updateFilmScheduleEntryRuleSnapshot,
+  type FilmScheduleEntry,
+} from "./film-schedule-store";
 import { getNotificationService } from "./notification-service";
 import { getRuntimeService, type TmsRuntimeService } from "./runtime-service";
 import { readFilmSchedulerRecoverySettings } from "./setup-store";
@@ -1159,11 +1163,7 @@ export class FilmSchedulerEngine {
       };
     }
 
-    await updateFilmScheduleEntry(entry.id, {
-      ruleSnapshot: nextRule,
-    }).catch((error) => {
-      console.error("Failed to persist recovered film schedule show UUID:", error);
-    });
+    await updateFilmScheduleEntryRuleSnapshot(entry.id, nextRule);
   }
 
   private resolvePreloadSeconds(entry: FilmScheduleEntry): number {

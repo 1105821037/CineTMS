@@ -643,16 +643,18 @@
 
 .cinema-progress-markers {
   position: absolute;
-  inset: 0;
+  inset: 0 0.65rem;
   pointer-events: none;
 }
 
 .cinema-progress-marker {
+  appearance: none;
   position: absolute;
   top: 50%;
   z-index: 2;
   width: 0.8rem;
   height: 0.8rem;
+  min-width: 0;
   min-height: 0;
   padding: 0;
   border: 2px solid var(--color-base-100);
@@ -665,9 +667,9 @@
 }
 
 .cinema-progress-marker.is-playlist {
-  border-radius: 0.1rem;
+  border-radius: 999px;
   background: var(--color-warning);
-  transform: translate(-50%, -50%) rotate(45deg);
+  transform: translate(-50%, -50%);
 }
 
 .cinema-progress-marker.is-mixed,
@@ -1325,6 +1327,31 @@
   .cinema-player-progress {
     gap: 0.55rem;
     padding: 0.8rem;
+  }
+
+  .cinema-progress-markers {
+    inset-inline: 0.55rem;
+  }
+
+  .cinema-progress-marker {
+    width: 0.68rem;
+    height: 0.68rem;
+    border-width: 1px;
+  }
+
+  .cinema-progress-marker.is-mixed,
+  .cinema-progress-marker.is-cluster {
+    width: 0.78rem;
+    height: 0.78rem;
+  }
+
+  .cinema-progress-marker.is-selected {
+    outline-width: 1px;
+    outline-offset: 1px;
+  }
+
+  .cinema-progress-range {
+    height: 0.45rem;
   }
 
   .cinema-progress-head {

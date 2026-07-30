@@ -4,10 +4,16 @@ setlocal
 set IMAGE=tms:latest
 set OUTPUT=tms-latest.tar
 set TMP_OUTPUT=%OUTPUT%.tmp
+set BUILD_SEQUENCE_FILE=.tms\docker-build-sequence.txt
 set DOCKER_BUILDKIT=1
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMddHHmm"') do set TMS_BUILD_TIME=%%i
-set TMS_COMMIT=
-for /f %%i in ('git rev-parse --short HEAD 2^>nul') do set TMS_COMMIT=%%i
+set BUILD_TIME=
+for /f %%i in ('powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\docker-build-sequence.ps1" -StateFile "%BUILD_SEQUENCE_FILE%"') do set BUILD_TIME=%%i
+if not defined BUILD_TIME (
+  echo Failed to generate Docker build time.
+  exit /b 1
+)
+set BUILD_COMMIT=
+for /f %%i in ('git rev-parse --short HEAD 2^>nul') do set BUILD_COMMIT=%%i
 
 where docker >nul 2>nul
 if errorlevel 1 (
@@ -41,12 +47,12 @@ if exist "%OUTPUT%" (
 )
 
 echo Building Docker image: %IMAGE%
-echo Build time: %TMS_BUILD_TIME%
-if defined TMS_COMMIT echo Commit: %TMS_COMMIT%
+echo Build time: %BUILD_TIME%
+if defined BUILD_COMMIT echo Commit: %BUILD_COMMIT%
 docker build ^
-  --build-arg TMS_BUILD_TIME=%TMS_BUILD_TIME% ^
-  --build-arg TMS_RELEASE_CHANNEL=docker ^
-  --build-arg TMS_COMMIT=%TMS_COMMIT% ^
+  --build-arg BUILD_TIME=%BUILD_TIME% ^
+  --build-arg RELEASE_CHANNEL=docker ^
+  --build-arg BUILD_COMMIT=%BUILD_COMMIT% ^
   -t %IMAGE% .
 if errorlevel 1 (
   echo Docker build failed.
@@ -71,6 +77,12 @@ if errorlevel 1 (
 move /y "%TMP_OUTPUT%" "%OUTPUT%" >nul
 if errorlevel 1 (
   echo Failed to finalize package: %OUTPUT%
+  exit /b 1
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\docker-build-sequence.ps1" -StateFile "%BUILD_SEQUENCE_FILE%" -CommitBuildTime "%BUILD_TIME%"
+if errorlevel 1 (
+  echo Package created, but failed to save build sequence: %BUILD_TIME%
   exit /b 1
 )
 

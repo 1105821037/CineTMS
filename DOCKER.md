@@ -6,11 +6,11 @@
 docker build -t tms:latest .
 ```
 
-如需在侧边栏显示 Docker 构建时间，可传入 `yyyyMMddHHmm` 格式的构建参数：
+如需在侧边栏显示 Docker 构建时间，可传入 `yyyyMMdd-NN` 格式的构建参数：
 
 ```powershell
-$buildTime = Get-Date -Format yyyyMMddHHmm
-docker build --build-arg TMS_BUILD_TIME=$buildTime --build-arg TMS_RELEASE_CHANNEL=docker -t tms:latest .
+$buildTime = "$(Get-Date -Format yyyyMMdd)-01"
+docker build --build-arg BUILD_TIME=$buildTime --build-arg RELEASE_CHANNEL=docker -t tms:latest .
 ```
 
 镜像会包含中影华夏 KDM 下载所需的 Python 运行时、Chromium、验证码识别模型和 Python 依赖，因此构建时间和镜像体积会比纯 Node 版本更大。
@@ -21,7 +21,9 @@ docker build --build-arg TMS_BUILD_TIME=$buildTime --build-arg TMS_RELEASE_CHANN
 .\package-docker.bat
 ```
 
-打包脚本会自动写入 Docker 构建时间，格式类似 `202607130105`。
+打包脚本会自动写入 Docker 构建时间，格式类似 `20260713-01`。末尾序号表示当天第几次成功打包，记录保存在 `.tms/docker-build-sequence.txt`；构建或导出失败不会增加序号。
+
+构建时间、发布渠道和 Git 提交号只会写入镜像内的 `/app/build-info.json`。运行时不再读取或兼容构建版本环境变量。
 
 默认会生成：
 
@@ -61,11 +63,12 @@ docker run -d --name tms-web `
 docker compose up -d --build
 ```
 
-如需让 compose 构建也写入版本构建时间：
+如需让 compose 构建也写入版本构建时间，请把它作为一次性的 Docker build arg 传入：
 
 ```powershell
-$env:TMS_BUILD_TIME = Get-Date -Format yyyyMMddHHmm
-docker compose up -d --build
+$buildTime = "$(Get-Date -Format yyyyMMdd)-01"
+docker compose build --build-arg BUILD_TIME=$buildTime --build-arg RELEASE_CHANNEL=docker
+docker compose up -d --no-build
 ```
 
 访问 `http://localhost:4174`，初始化时填写你已有的外部 MySQL 连接信息。请确保 TMS 容器可以访问该 MySQL 地址。

@@ -321,13 +321,22 @@ async function readSystemVersion(): Promise<{
   readonly buildTime?: string;
 }> {
   const packageJson = await readPackageJson().catch(() => ({} as Record<string, unknown>));
+  const buildInfo = await readBuildInfo().catch(() => ({} as Record<string, unknown>));
   return {
     name: typeof packageJson.name === "string" ? packageJson.name : "tms",
     version: typeof packageJson.version === "string" ? packageJson.version : "0.0.0",
-    channel: process.env.TMS_RELEASE_CHANNEL?.trim() || process.env.NODE_ENV || "dev",
-    commit: process.env.TMS_COMMIT?.trim() || process.env.GIT_COMMIT?.trim() || undefined,
-    buildTime: process.env.TMS_BUILD_TIME?.trim() || undefined,
+    channel: readOptionalString(buildInfo.channel) || "dev",
+    commit: readOptionalString(buildInfo.commit),
+    buildTime: readOptionalString(buildInfo.buildTime),
   };
+}
+
+async function readBuildInfo(): Promise<Record<string, unknown>> {
+  const raw = await readFile(resolve(process.cwd(), "build-info.json"), "utf8");
+  const parsed = JSON.parse(raw);
+  return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+    ? parsed as Record<string, unknown>
+    : {};
 }
 
 async function readPackageJson(): Promise<Record<string, unknown>> {
@@ -336,6 +345,12 @@ async function readPackageJson(): Promise<Record<string, unknown>> {
   return parsed && typeof parsed === "object" && !Array.isArray(parsed)
     ? parsed as Record<string, unknown>
     : {};
+}
+
+function readOptionalString(value: unknown): string | undefined {
+  return typeof value === "string"
+    ? value.trim() || undefined
+    : undefined;
 }
 
 interface DirectoryEntry {

@@ -1,6 +1,6 @@
 {
   "name": "tms",
-  "version": "beta1.2",
+  "version": "beta1.3",
   "private": true,
   "description": "TMS cinema management system with GDC projector/server integration",
   "scripts": {

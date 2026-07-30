@@ -10,7 +10,8 @@ COPY src ./src
 RUN npm run build
 
 COPY scripts/kdm-auto-download-ts/package*.json ./scripts/kdm-auto-download-ts/
-RUN cd scripts/kdm-auto-download-ts && npm ci
+RUN cd scripts/kdm-auto-download-ts \
+    && ONNXRUNTIME_NODE_INSTALL=skip npm ci
 COPY scripts/kdm-auto-download-ts/tsconfig.json ./scripts/kdm-auto-download-ts/tsconfig.json
 COPY scripts/kdm-auto-download-ts/src ./scripts/kdm-auto-download-ts/src
 RUN cd scripts/kdm-auto-download-ts && npm run build
@@ -19,14 +20,7 @@ FROM node:22-bookworm-slim AS runtime
 
 WORKDIR /app
 
-ARG TMS_BUILD_TIME=
-ARG TMS_RELEASE_CHANNEL=docker
-ARG TMS_COMMIT=
-
 ENV NODE_ENV=production \
-    TMS_BUILD_TIME=${TMS_BUILD_TIME} \
-    TMS_RELEASE_CHANNEL=${TMS_RELEASE_CHANNEL} \
-    TMS_COMMIT=${TMS_COMMIT} \
     PORT=4173 \
     FTP_HOST=0.0.0.0 \
     FTP_PORT=2121 \
@@ -54,10 +48,11 @@ RUN npm ci --omit=dev \
 COPY --chown=node:node --from=build /app/dist ./dist
 COPY --chown=node:node web ./web
 COPY --chown=node:node --chmod=755 docker-entrypoint.sh ./docker-entrypoint.sh
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh
 
 COPY --chown=node:node scripts/kdm-auto-download-ts/package*.json ./scripts/kdm-auto-download-ts/
 RUN cd scripts/kdm-auto-download-ts \
-    && npm ci --omit=dev \
+    && ONNXRUNTIME_NODE_INSTALL=skip npm ci --omit=dev \
     && npm cache clean --force \
     && rm -rf \
       node_modules/onnxruntime-node/bin/napi-v6/darwin \
@@ -73,6 +68,13 @@ RUN cd scripts/kdm-auto-download-ts \
 
 COPY --chown=node:node --from=build /app/scripts/kdm-auto-download-ts/dist ./scripts/kdm-auto-download-ts/dist
 COPY --chown=node:node scripts/kdm-auto-download-ts/best.onnx ./scripts/kdm-auto-download-ts/best.onnx
+
+ARG BUILD_TIME=
+ARG RELEASE_CHANNEL=docker
+ARG BUILD_COMMIT=
+RUN node -e 'const fs = require("node:fs"); const value = (item) => item?.trim() || undefined; const [channel, commit, buildTime] = process.argv.slice(1); fs.writeFileSync("/app/build-info.json", JSON.stringify({ channel: value(channel) || "docker", commit: value(commit), buildTime: value(buildTime) }, null, 2) + "\n");' \
+      -- "${RELEASE_CHANNEL}" "${BUILD_COMMIT}" "${BUILD_TIME}" \
+    && chown node:node /app/build-info.json
 
 VOLUME ["/app/.tms"]
 EXPOSE 4173 2121

@@ -538,7 +538,6 @@ async function authenticateUserWithConnection(
     throw new Error("用户名或密码错误。");
   }
 
-  await connection.execute("DELETE FROM tms_session WHERE user_id = ?", [Number(row.id)]);
   return createSession(connection, Number(row.id), String(row.username));
 }
 

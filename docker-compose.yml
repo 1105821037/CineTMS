@@ -2,10 +2,6 @@ services:
   tms:
     build:
       context: .
-      args:
-        TMS_BUILD_TIME: ${TMS_BUILD_TIME:-}
-        TMS_RELEASE_CHANNEL: ${TMS_RELEASE_CHANNEL:-docker}
-        TMS_COMMIT: ${TMS_COMMIT:-}
     image: tms:latest
     container_name: tms-web
     restart: unless-stopped
